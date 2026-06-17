@@ -27,7 +27,7 @@ Osprey MRSI is an extension of the Osprey MRS toolbox  for state-of-the art proc
 - GABA-edited MEGA Spin Echo MRSI
 
 ### Supported file formats
-- NIfTI-MRS (see (spec2nii toolbox)[https://github.com/wtclarke/spec2nii] for more details about how to convert your data)
+- NIfTI-MRS (see [spec2nii toolbox](https://github.com/wtclarke/spec2nii) for more details about how to convert your data)
 - Philips: SDAT/SPAR, DATA/LIST
 - Siemens & GE are supported via conversion to NIfTI-MRS
 
