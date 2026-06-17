@@ -42,6 +42,12 @@ required for full functionality:
 - Optimization
 - Statistics and Machine Learning
 
+Osprey-MRSI uses [plotly](https://plotly.com/matlab/getting-started/) to generate interactive HTML reports (osprey-mrsi/mrsi/OspreyMRSIHTMLReport.m). The dependencies for this are automatically installed during the first function call. Please consult the above reference website for more information.
+
+If you want to use FSLeyes for interactive inspection of the MRSI analysis results, in addtion to the Osprey-native visualization, you will have to install FSLeyes (v0.1.17.0) as described [here](https://fsl.fmrib.ox.ac.uk/fsl/docs/utilities/fsleyes.html).
+Make sure the fsleyes-plugin-mrs (v0.1.7) is correclty installed with your FSLeyes. Otherwise follow the instructions described [here](https://git.fmrib.ox.ac.uk/wclarke/fsleyes-plugin-mrs)
+For full feature support you will also have to add the viridis colourmap to FSLeyes. Find the location of FSLeyes, e.g., …/FSLeyes/lib/python3.13/site-packages/fsleyes/assets/colourmaps, copy the viridis color map file from osprey-mrsi/mrsi/viridis.cmap into the colourmaps folder, and add ‘virdis Viridis’ to the order.txt file located in the same folder.
+
 ### Installation
 
 Download the latest **Osprey-MRSI** code from its [GitHub
@@ -56,6 +62,8 @@ extract and add to your MATLAB path. If you run an Apple Silicon processor
 (M1 and later), please download the [SPM development version from GitHub](https://github.com/spm/spm).
 
 Make sure to remove Osprey, FID-A, and Gannet from your MATLAB path.
+
+Visit the [open science framework](10.17605/OSF.IO/VKDPR) for more information on how to run the example data.
 
 ## Contact, Feedback, Suggestions
 
