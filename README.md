@@ -50,7 +50,7 @@ If you want to use FSLeyes for interactive inspection of the MRSI analysis resul
 
 Make sure the fsleyes-plugin-mrs (v0.1.7) is correclty installed with your FSLeyes. Otherwise follow the instructions described [here](https://git.fmrib.ox.ac.uk/wclarke/fsleyes-plugin-mrs).
 
-For full feature support you will also have to add the viridis colourmap to FSLeyes. Find the location of FSLeyes, e.g., …/FSLeyes/lib/python3.13/site-packages/fsleyes/assets/colourmaps, copy the viridis color map file from osprey-mrsi/mrsi/viridis.cmap into the colourmaps folder, and add ‘virdis Viridis’ to the order.txt file located in the same folder.
+For full feature support you will also have to add the viridis colourmap to FSLeyes. Find the location of FSLeyes, e.g., _…/FSLeyes/lib/python3.13/site-packages/fsleyes/assets/colourmaps_, copy the viridis color map file from _osprey-mrsi/mrsi/viridis.cmap_ into the colourmaps folder, and add ‘virdis Viridis’ to the order.txt file located in the same folder.
 
 ### Installation
 
