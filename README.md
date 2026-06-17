@@ -1,7 +1,6 @@
 # Osprey-MRSI
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/HJZollner/osprey-mrsi)](https://github.com/HJZollner/osprey-mrsi/releases)
 [![GitHub Release Date](https://img.shields.io/github/release-date/HJZollner/osprey-mrsi)](https://github.com/HJZollner/osprey-mrsi/releases)
-[![Build Status](https://dev.azure.com/OspreyCI/Osprey/_apis/build/status/develop-pull?branchName=develop)](https://dev.azure.com/OspreyCI/Osprey/_build/latest?definitionId=1&branchName=develop)
 [![GitHub commit activity](https://img.shields.io/github/commit-activity/m/HJZollner/osprey-mrsi?foo=bar)](https://github.com/HJZollner/osprey-mrsi/commits/develop)
 [![GitHub last commit](https://img.shields.io/github/last-commit/HJZollner/osprey-mrsi)](https://github.com/HJZollner/osprey-mrsi/commits/develop)
 [![License](https://img.shields.io/github/license/HJZollner/osprey-mrsi)](https://github.com/HJZollner/osprey-mrsi/blob/develop/LICENSE.md)
