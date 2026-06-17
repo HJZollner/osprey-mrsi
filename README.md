@@ -20,14 +20,14 @@ Osprey MRSI is an extension of the Osprey MRS toolbox  for state-of-the art proc
 - Quantification based on tissue fractions and (customizable) metabolite/tissue water relaxation times
 - Atlas-based analysis of the MRSI data
 - Interactive GUI to display MRSI data, quality assessment, and quantitative results at each step of the analysis
-- Seamless integration with FSL-eyes viewer for even more interactive review
+- Seamless integration with FSLeyes viewer for even more interactive review
 
 ### Supported methods
 - Conventional MRSI (Spin Echo, FID)
 - GABA-edited MEGA Spin Echo MRSI
 
 ### Supported file formats
-- NIfTI-MRS
+- NIfTI-MRS (see (spec2nii toolbox)[https://github.com/wtclarke/spec2nii] for more details about how to convert your data)
 - Philips: SDAT/SPAR, DATA/LIST
 - Siemens & GE are supported via conversion to NIfTI-MRS
 
@@ -42,10 +42,14 @@ required for full functionality:
 - Optimization
 - Statistics and Machine Learning
 
+#### Plotly
 Osprey-MRSI uses [plotly](https://plotly.com/matlab/getting-started/) to generate interactive HTML reports (osprey-mrsi/mrsi/OspreyMRSIHTMLReport.m). The dependencies for this are automatically installed during the first function call. Please consult the above reference website for more information.
 
+#### FSLeyes
 If you want to use FSLeyes for interactive inspection of the MRSI analysis results, in addtion to the Osprey-native visualization, you will have to install FSLeyes (v0.1.17.0) as described [here](https://fsl.fmrib.ox.ac.uk/fsl/docs/utilities/fsleyes.html).
-Make sure the fsleyes-plugin-mrs (v0.1.7) is correclty installed with your FSLeyes. Otherwise follow the instructions described [here](https://git.fmrib.ox.ac.uk/wclarke/fsleyes-plugin-mrs)
+
+Make sure the fsleyes-plugin-mrs (v0.1.7) is correclty installed with your FSLeyes. Otherwise follow the instructions described [here](https://git.fmrib.ox.ac.uk/wclarke/fsleyes-plugin-mrs).
+
 For full feature support you will also have to add the viridis colourmap to FSLeyes. Find the location of FSLeyes, e.g., …/FSLeyes/lib/python3.13/site-packages/fsleyes/assets/colourmaps, copy the viridis color map file from osprey-mrsi/mrsi/viridis.cmap into the colourmaps folder, and add ‘virdis Viridis’ to the order.txt file located in the same folder.
 
 ### Installation
