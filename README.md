@@ -3,7 +3,7 @@
 [![GitHub Release Date](https://img.shields.io/github/release-date/HJZollner/osprey-mrsi)](https://github.com/HJZollner/osprey-mrsi/releases)
 [![GitHub commit activity](https://img.shields.io/github/commit-activity/m/HJZollner/osprey-mrsi?foo=bar)](https://github.com/HJZollner/osprey-mrsi/commits/develop)
 [![GitHub last commit](https://img.shields.io/github/last-commit/HJZollner/osprey-mrsi)](https://github.com/HJZollner/osprey-mrsi/commits/develop)
-[![License](https://img.shields.io/github/license/HJZollner/osprey-mrsi)](https://github.com/HJZollner/osprey-mrsi/blob/main/LICENSE)
+[![License](https://img.shields.io/github/license/HJZollner/osprey-mrsi)](https://github.com/HJZollner/osprey-mrsi/blob/main/LICENSE.md)
 [![GitHub Total Downloads](https://img.shields.io/github/downloads/HJZollner/osprey-mrsi/total)](https://github.com/HJZollner/osprey-mrsi/releases)
 
 
