@@ -87,7 +87,7 @@ We also welcome your direct contributions to Osprey here in the GitHub repositor
 - [Georg Oeltzschner](mailto:goeltzs1@jhu.edu)
 
 
-Should you publish material that made use of Osprey, please cite the following publication:
+Should you publish material that made use of Osprey-MRSI, please cite the following publication:
 
 [G Oeltzschner, HJ Zöllner, SCN Hui, M Mikkelsen, MG Saleh, S Tapper, RAE Edden. Osprey: Open-Source Processing, Reconstruction  & Estimation of Magnetic Resonance Spectroscopy Data. J Neurosci Meth 343:108827 (2020).](https://doi.org/10.1016/j.jneumeth.2020.108827)
 
