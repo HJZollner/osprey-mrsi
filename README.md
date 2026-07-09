@@ -69,7 +69,7 @@ Make sure to remove Osprey, FID-A, and Gannet from your MATLAB path.
 
 ### Example data
 
-Visit the [open science framework](https://osf.io/vkdpr/overview) for more information on how to run the example data.
+Visit the [Open Science Framework](https://osf.io/vkdpr/overview) for more information on how to run the example data.
 
 ## Contact, Feedback, Suggestions
 
