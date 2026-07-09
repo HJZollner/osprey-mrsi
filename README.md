@@ -84,7 +84,6 @@ We also welcome your direct contributions to Osprey here in the GitHub repositor
 ## Developers
 
 - [Helge J. Zöllner](mailto:hzoelln2@jhu.edu)
-- [Georg Oeltzschner](mailto:goeltzs1@jhu.edu)
 
 
 Should you publish material that made use of Osprey-MRSI, please cite the following publication:
@@ -98,6 +97,7 @@ This work has been supported by NIH grants R01 EB016089, P41 EB15909, P41 EB0317
 We also wish to thank the following individuals for their contributions to the
 development of Osprey and shared processing code:
 
+- Georg Oeltzschner (Johns Hopkins University, Baltimore, MD)
 - Jamie Near (McGill University, Montreal)
 - Ralph Noeske (GE Healthcare, Berlin)
 - Peter Barker (Johns Hopkins University, Baltimore, MD)
