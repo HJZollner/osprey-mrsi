@@ -165,11 +165,11 @@ polResidNAA = 1; % Polarity NAA
 % Options for auto phasing
 % opts.MRSI.phase.type = 'none';
 % opts.MRSI.phase.type = 'Cr-Cho';
-% opts.MRSI.phase.type = 'auto_phase';
-% opts.MRSI.phase.limits = [1.7,2.2];
-opts.MRSI.phase.type = 'LCM';
-opts.MRSI.phase.ModelProcedureFileMetabolites = which('/model-procedures/mrsi/1Step_Spline_invivo_FreqAndPhase.json');
-opts.MRSI.phase.BasisSetFile = {which('/fit/basissets/mrsi/BASIS_Philips_UnEdited_se_MRSI_PRESS_GABA15_noMM.mat')};
+opts.MRSI.phase.type = 'auto_phase';
+opts.MRSI.phase.limits = [1.7,2.2];
+% opts.MRSI.phase.type = 'LCM';
+% opts.MRSI.phase.ModelProcedureFileMetabolites = which('/model-procedures/mrsi/1Step_Spline_invivo_FreqAndPhase.json');
+% opts.MRSI.phase.BasisSetFile = {which('/fit/basissets/mrsi/BASIS_Philips_UnEdited_se_MRSI_PRESS_GABA15_noMM.mat')};
 
 % Options for MRSI nuisance signal removal are:
 % No water removal
@@ -208,7 +208,7 @@ opts.MRSI.NuisanceRemoval.lipid.basisArguments.plotBasis = false;
 
 % Options for MRSI frequency alignment are:
 % No frequency alignment
-opts.MRSI.FreqAlign.type = 'none';
+% opts.MRSI.FreqAlign.type = 'none';
 
 % Cross-correlation alignment of frequencies defined below
 % opts.MRSI.FreqAlign.type = 'CC';
@@ -219,13 +219,13 @@ opts.MRSI.FreqAlign.type = 'none';
 % opts.MRSI.FreqAlign.zerofill = 0;
 
 % Cross-correlation alignment of frequencies defined below after Wavelet filter of baseline if lipid/noise > thresh
-% opts.MRSI.FreqAlign.type = 'CCwithLipRemoval';
-% opts.MRSI.FreqAlign.thresh = 10;
-% opts.MRSI.FreqAlign.frequencies = [2.01,3.03,3.22];
-% opts.MRSI.FreqAlign.polarity = [1,1,1];
-% opts.MRSI.FreqAlign.lim = [1.85,4];
-% opts.MRSI.FreqAlign.realpart = 0;
-% opts.MRSI.FreqAlign.zerofill = 0;
+opts.MRSI.FreqAlign.type = 'CCwithLipRemoval';
+opts.MRSI.FreqAlign.thresh = 10;
+opts.MRSI.FreqAlign.frequencies = [2.01,3.03,3.22];
+opts.MRSI.FreqAlign.polarity = [1,1,1];
+opts.MRSI.FreqAlign.lim = [1.85,4];
+opts.MRSI.FreqAlign.realpart = 0;
+opts.MRSI.FreqAlign.zerofill = 0;
 
 
 
@@ -233,15 +233,15 @@ opts.MRSI.FreqAlign.type = 'none';
 opts.MRSI.MaxEcho.separate = 0;
 
 % Cross-correlation alignment of frequencies defined below
-opts.MRSI.MaxEcho.FreqAlign.type = 'CC';
-opts.MRSI.MaxEcho.FreqAlign.frequencies = [3.03,3.22,3.9];
-opts.MRSI.MaxEcho.FreqAlign.polarity = [1,1,1];
-opts.MRSI.MaxEcho.FreqAlign.lim = [2.5,4.5];
-opts.MRSI.MaxEcho.FreqAlign.realpart = 1;
-opts.MRSI.MaxEcho.FreqAlign.zerofill = 1;
+% opts.MRSI.MaxEcho.FreqAlign.type = 'CC';
+% opts.MRSI.MaxEcho.FreqAlign.frequencies = [3.03,3.22,3.9];
+% opts.MRSI.MaxEcho.FreqAlign.polarity = [1,1,1];
+% opts.MRSI.MaxEcho.FreqAlign.lim = [2.5,4.5];
+% opts.MRSI.MaxEcho.FreqAlign.realpart = 1;
+% opts.MRSI.MaxEcho.FreqAlign.zerofill = 1;
 
 % Cross-correlation alignment of frequencies defined below after Wavelet filter of baseline if lipid/noise > thresh
-% opts.MRSI.MaxEcho.FreqAlign.type = 'CCwithLipRemoval'; 
+% opts.MRSI.MaxEcho.FreqAlign.type = 'CCwithLipRemoval';
 % opts.MRSI.MaxEcho.FreqAlign.thresh = 10;
 % opts.MRSI.MaxEcho.FreqAlign.frequencies = [2.01,3.03,3.22,3.9];
 % opts.MRSI.MaxEcho.FreqAlign.polarity = [1,1,1,1];
@@ -400,7 +400,7 @@ files_w     = {which(fullfile('exampledata','mrsi','Philips','TE_15','mrs','5SL_
 files_nii   = {which(fullfile('exampledata','mrsi','Philips','TE_15','anat_nii','T1w_anat.nii.gz'))};
 
 % Link to single  NIfTI (*.nii) files for MRSI localizer file which has the
-% smae geometry and position as the MRSI data 
+% smae geometry and position as the MRSI data
 
 files_nii_MRSIloc = {which(fullfile('exampledata','mrsi','Philips','TE_15','anat_nii','MRSI_localizer.nii.gz'))};
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
