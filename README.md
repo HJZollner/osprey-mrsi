@@ -4,7 +4,6 @@
 [![GitHub commit activity](https://img.shields.io/github/commit-activity/m/HJZollner/osprey-mrsi?foo=bar)](https://github.com/HJZollner/osprey-mrsi/commits/develop)
 [![GitHub last commit](https://img.shields.io/github/last-commit/HJZollner/osprey-mrsi)](https://github.com/HJZollner/osprey-mrsi/commits/develop)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/HJZollner/osprey-mrsi/blob/main/LICENSE.md)
-[![GitHub Total Downloads](https://img.shields.io/github/downloads/HJZollner/osprey-mrsi/total)](https://github.com/HJZollner/osprey-mrsi/releases)
 
 
 <img src="graphics/osprey.png" alt="Osprey" width="200"/>
