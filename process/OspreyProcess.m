@@ -353,6 +353,10 @@ if MRSCont.flags.isMRSI
                                 switch MRSCont.opts.MRSI.MaxEcho.phase.type
                                     case 'none'
                                         % Do nothing
+                                    case 'first-point'
+                                        % Do phasing based on the first fid point
+                                        raw.fids = raw.fids .*conj(raw.fids(1,:,:,:))./abs(raw.fids(1,:,:,:));
+                                        raw.specs=fftshift(fft(raw.fids,[],raw.dims.t),raw.dims.t);    
                                     case 'Cr-Cho'
                                         % Fit a double-Lorentzian to the Cr-Cho area, and phase the spectrum
                                         % with the negative phase of that fit

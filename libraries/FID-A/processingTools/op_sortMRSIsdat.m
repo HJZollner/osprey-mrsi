@@ -187,8 +187,10 @@ if averages == 1
     if dims.Yvoxels>dims.averages
         dims.Yvoxels=dims.Yvoxels-1;
     end
-    if dims.Zvoxels>dims.averages
-        dims.Zvoxels=dims.Zvoxels-1;
+    if isfield(dims, 'Zvoxels')
+        if dims.Zvoxels>dims.averages
+            dims.Zvoxels=dims.Zvoxels-1;
+        end
     end
 end
 
@@ -199,7 +201,9 @@ for sl = 1 : in.nZvoxels
 end
 
 if flip_mrsi.cc
-    fids(:,:,:,:)=flip(fids(:,:,:,:),dims.Zvoxels);
+    if isfield(dims, 'Zvoxels')
+        fids(:,:,:,:)=flip(fids(:,:,:,:),dims.Zvoxels);
+    end
 end
 
 

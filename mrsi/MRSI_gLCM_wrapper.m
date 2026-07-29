@@ -300,9 +300,11 @@ end
     model = cell(1,length(data_vec));
     ModelProcedureCell = cell(1,length(data_vec));
 
-    for vx = 1:  length(data_vec)
-        ModelProcedureCell{vx} = ModelProcedure;
-    end
+    % If we have a per model procedure change we might need that. But lets
+    % remove for now
+    % for vx = 1:  length(data_vec)
+        ModelProcedureCell{1} = ModelProcedure;
+    % end
 
     % Get the basissets setup for the model (including more than one for 2D
     % modeling)
@@ -368,7 +370,7 @@ end
         S = parallel.pool.Constant(scaleData);
         tstart = tic;
         parfor vx = 1:  length(data_vec)
-                model(vx) = Osprey_gLCM(D.Value(vx),M.Value{vx},0,~zero_fill,S.Value,0,0,BASIS,1);
+                model(vx) = Osprey_gLCM(D.Value(vx),M.Value{1},0,~zero_fill,S.Value,0,0,BASIS,1);
                 model{vx}.economizeStorage(1,1);                         % Remove basis set and jacobians
                 WaitMessage.Send;
         end
@@ -385,7 +387,7 @@ end
     else    % Sequential processing
         tstart = tic;
         for vx = 1:  length(data_vec)
-                model(vx) = Osprey_gLCM(data_vec(vx),ModelProcedureCell{vx},0,~zero_fill,scaleData,0,0,BASIS,1);
+                model(vx) = Osprey_gLCM(data_vec(vx),ModelProcedureCell{1},0,~zero_fill,scaleData,0,0,BASIS,1);
                 model{vx}.economizeStorage(1,1);                         % Remove basis set and jacobians 
                 WaitMessage.Send;
         end
