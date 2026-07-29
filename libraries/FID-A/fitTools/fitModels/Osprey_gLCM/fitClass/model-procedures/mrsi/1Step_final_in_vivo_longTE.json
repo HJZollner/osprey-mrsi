@@ -30,7 +30,7 @@
           "order": 2
         },
         "solver": "lsqnonlin",
-        "iterations": 250
+        "iterations": 300
       },
       "parameter": [
         "ph0","ph1","GlobFreqShift","gaussLB","lorentzLB","freqShift","metAmpl","baseAmpl"
@@ -84,7 +84,7 @@
           "order": 2
         },
         "solver": "lsqnonlin",
-        "iterations": 250
+        "iterations": 300
       },
       "parameter": [
         "ph0","ph1","GlobFreqShift","gaussLB","lorentzLB","freqShift","metAmpl","baseAmpl"

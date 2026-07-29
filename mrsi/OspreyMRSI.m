@@ -1,9 +1,8 @@
 function [MRSCont] = OspreyMRSI(jobFile,overwrite,stopAfterProcess)
-%% MRSI analysis wrapper in Osprey
+%% MRSI analysis wrapper in Osprey-MRSI v. 1.0.0
 % This is script accompanies the beta version of the MRSI analysis pipeline
 % in Osprey which was presented at ISMRM 2025. 
 % 
-% It will be part of the upcoming Osprey release 3.0.0
 % Please make sure to remove any older Osprey versions from your Matlab
 % path. Add the full OspreyMRSIbeta folder to the path. For data
 % visualization you need to install FSL-eyes with the mrs-plugin. Currently
@@ -14,7 +13,7 @@ function [MRSCont] = OspreyMRSI(jobFile,overwrite,stopAfterProcess)
 %
 % The folder contains three example datasets from Philips and Siemens.
 % Philips SPAR/SDAT and data/list files are most supported. All other data
-% needs to be converted to nifti-mrs format using spec2nii ().
+% needs to be converted to nifti-mrs format using spec2nii.
 %
 % Below you can find example function calls for the MRSI analysis
 %% Parse input
@@ -135,9 +134,13 @@ end
 
 % Options for auto phasing
 % MRSCont.opts.MRSI.phase.type = 'none';
+% MRSCont.opts.MRSI.phase.type = 'first-point';
 % MRSCont.opts.MRSI.phase.type = 'Cr-Cho';
 % MRSCont.opts.MRSI.phase.type = 'auto_phase';
 % MRSCont.opts.MRSI.phase.limits = [1.7,2.2];
+% MRSCont.opts.MRSI.phase.type = 'LCM';
+% MRSCont.opts.MRSI.phase.ModelProcedureFileMetabolites = which('/model-procedures/mrsi/1Step_Spline_invivo_FreqAndPhase.json');
+% MRSCont.opts.MRSI.phase.BasisSetFile = {which('/fit/basissets/mrsi/BASIS_Philips_UnEdited_se_MRSI_PRESS_GABA70_noMM.mat')};
 
 % Options for MRSI nuisance signal removal are:
 % MRSCont.opts.MRSI.NuisanceRemoval.water.type = 'none';
@@ -186,6 +189,16 @@ end
 % MRSCont.opts.MRSI.MaxEcho.tstart = 75; %When did the ADC start?
 % MRSCont.opts.MRSI.MaxEcho.AdditionalPhasing = 1;
 % MRSCont.opts.MRSI.MaxEcho.AdditionalFreqAlign = 1;
+
+%Phasing
+% MRSCont.opts.MRSI.MaxEcho.phase.type = 'none';
+% MRSCont.opts.MRSI.MaxEcho.phase.type = 'first-point';
+% MRSCont.opts.MRSI.MaxEcho.phase.type = 'Cr-Cho';
+% MRSCont.opts.MRSI.MaxEcho.phase.type = 'auto_phase';
+% MRSCont.opts.MRSI.MaxEcho.phase.limits = [1.7,2.2];
+% MRSCont.opts.MRSI.MaxEcho.phase.type = 'LCM';
+% MRSCont.opts.MRSI.MaxEcho.phase.ModelProcedureFileMetabolites = which('/model-procedures/mrsi/1Step_Spline_invivo_FreqAndPhase_longTE.json');
+% MRSCont.opts.MRSI.MaxEcho.phase.BasisSetFile = {which('/fit/basissets/mrsi/BASIS_Philips_UnEdited_se_MRSI_PRESS_GABA70_noMM.mat')};
 
 % Cross-correlation alignment of frequencies defined below
 % MRSCont.opts.MRSI.MaxEcho.FreqAlign.type = 'CC';

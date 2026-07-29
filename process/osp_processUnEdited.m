@@ -195,59 +195,53 @@ for kk = 1:MRSCont.nDatasets
 
         
 
-        %%% 7. REFERENCE SPECTRUM CORRECTLY TO FREQUENCY AXIS AND PHASE SIEMENS
-        %%% DATA
-%         refShift = 0;
-        if MRSCont.flags.isMRSI
-            switch MRSCont.opts.MRSI.FreqAlign.type
-                case 'CC'
-                    temp = raw;
-                    if MRSCont.opts.MRSI.FreqAlign.zerofill
-                        temp = op_zeropad(temp,4);
-                    end
-                    [refShift, ~] = osp_XReferencing(temp,MRSCont.opts.MRSI.FreqAlign.frequencies,MRSCont.opts.MRSI.FreqAlign.polarity,...
-                                                    MRSCont.opts.MRSI.FreqAlign.lim,MRSCont.opts.MRSI.FreqAlign.realpart);
-                    temp = raw;
-                    [temp]             = op_freqshift(temp,-refShift);            % Reference spectra by cross-correlation 
-                    [~, refFWHM] = osp_XReferencing(temp,MRSCont.opts.MRSI.FreqAlign.frequencies,MRSCont.opts.MRSI.FreqAlign.polarity,...
-                                                    MRSCont.opts.MRSI.FreqAlign.lim,MRSCont.opts.MRSI.FreqAlign.realpart);
-                    raw.refFWHM = refFWHM;
-                    raw.refShift = 0;    
-                    [raw]             = op_freqshift(raw,-refShift);            % Reference spectra by cross-correlation 
-                case 'CCwithLipRemoval'
-                    temp = raw;
-                    if MRSCont.opts.MRSI.FreqAlign.zerofill
-                        temp = op_zeropad(temp,4);
-                    end
-                    noise = std(real(temp.specs(temp.ppm <= 0 & temp.ppm >= -2)));
-                    lipid = max(real(temp.specs(temp.ppm <= 1.9 & temp.ppm >= 0)));
-                    ratio = lipid/noise;
-                    if ratio > MRSCont.opts.MRSI.FreqAlign.thresh
-                        temp = op_Wavlet_Filter(temp, -2, 1.85, 2, 10, 0);
-                    end
-                    temp = op_Wavlet_Filter(temp, -2, 4.2, 2, 10000, 0);
-                    [refShift, ~] = osp_XReferencing(temp,MRSCont.opts.MRSI.FreqAlign.frequencies,MRSCont.opts.MRSI.FreqAlign.polarity,...
-                                                    MRSCont.opts.MRSI.FreqAlign.lim,MRSCont.opts.MRSI.FreqAlign.realpart);
-                    % [refShift, ~] = fit_OspreyReferencing(temp);
-                    temp = raw;
-                    [temp]             = op_freqshift(temp,-refShift);            % Reference spectra by cross-correlation 
-                    [~, refFWHM] = osp_XReferencing(temp,MRSCont.opts.MRSI.FreqAlign.frequencies,MRSCont.opts.MRSI.FreqAlign.polarity,...
-                                                    MRSCont.opts.MRSI.FreqAlign.lim,MRSCont.opts.MRSI.FreqAlign.realpart);
-                    % [~, refFWHM] = osp_CrChoReferencing(temp);
-                    raw.refFWHM = refFWHM;
-                    raw.refShift = 0;
-                    [raw]             = op_freqshift(raw,-refShift);            % Reference spectra by cross-correlation 
-                case 'none'
-                    [~, refFWHM] = osp_CrChoReferencing(raw);
-                    raw.refFWHM = refFWHM;
-                    raw.refShift = 0; 
-                    refShift = 0;  
-            end
-             
-        else
-            [refShift, ~] = osp_CrChoReferencing(raw);
-            [raw]             = op_freqshift(raw,-refShift);            % Reference spectra by cross-correlation  
+        %%% 7. REFERENCE SPECTRUM CORRECTLY TO FREQUENCY AXIS
+
+        switch MRSCont.opts.MRSI.FreqAlign.type
+            case 'CC'
+                temp = raw;
+                if MRSCont.opts.MRSI.FreqAlign.zerofill
+                    temp = op_zeropad(temp,4);
+                end
+                [refShift, ~] = osp_XReferencing(temp,MRSCont.opts.MRSI.FreqAlign.frequencies,MRSCont.opts.MRSI.FreqAlign.polarity,...
+                                                MRSCont.opts.MRSI.FreqAlign.lim,MRSCont.opts.MRSI.FreqAlign.realpart);
+                temp = raw;
+                [temp]             = op_freqshift(temp,-refShift);            % Reference spectra by cross-correlation 
+                [~, refFWHM] = osp_XReferencing(temp,MRSCont.opts.MRSI.FreqAlign.frequencies,MRSCont.opts.MRSI.FreqAlign.polarity,...
+                                                MRSCont.opts.MRSI.FreqAlign.lim,MRSCont.opts.MRSI.FreqAlign.realpart);
+                raw.refFWHM = refFWHM;
+                raw.refShift = 0;    
+                [raw]             = op_freqshift(raw,-refShift);            % Reference spectra by cross-correlation 
+            case 'CCwithLipRemoval'
+                temp = raw;
+                if MRSCont.opts.MRSI.FreqAlign.zerofill
+                    temp = op_zeropad(temp,4);
+                end
+                noise = std(real(temp.specs(temp.ppm <= 0 & temp.ppm >= -2)));
+                lipid = max(real(temp.specs(temp.ppm <= 1.9 & temp.ppm >= 0)));
+                ratio = lipid/noise;
+                if ratio > MRSCont.opts.MRSI.FreqAlign.thresh
+                    temp = op_Wavlet_Filter(temp, -2, 1.85, 2, 10, 0);
+                end
+                temp = op_Wavlet_Filter(temp, -2, 4.2, 2, 10000, 0);
+                [refShift, ~] = osp_XReferencing(temp,MRSCont.opts.MRSI.FreqAlign.frequencies,MRSCont.opts.MRSI.FreqAlign.polarity,...
+                                                MRSCont.opts.MRSI.FreqAlign.lim,MRSCont.opts.MRSI.FreqAlign.realpart);
+                % [refShift, ~] = fit_OspreyReferencing(temp);
+                temp = raw;
+                [temp]             = op_freqshift(temp,-refShift);            % Reference spectra by cross-correlation 
+                [~, refFWHM] = osp_XReferencing(temp,MRSCont.opts.MRSI.FreqAlign.frequencies,MRSCont.opts.MRSI.FreqAlign.polarity,...
+                                                MRSCont.opts.MRSI.FreqAlign.lim,MRSCont.opts.MRSI.FreqAlign.realpart);
+                % [~, refFWHM] = osp_CrChoReferencing(temp);
+                raw.refFWHM = refFWHM;
+                raw.refShift = 0;
+                [raw]             = op_freqshift(raw,-refShift);            % Reference spectra by cross-correlation 
+            case 'none'
+                [~, refFWHM] = osp_CrChoReferencing(raw);
+                raw.refFWHM = refFWHM;
+                raw.refShift = 0; 
+                refShift = 0;  
         end
+
         
            
         
@@ -258,37 +252,39 @@ for kk = 1:MRSCont.nDatasets
         end
 
 
-        if MRSCont.flags.isMRSI
-            switch MRSCont.opts.MRSI.phase.type
-                case 'none'
-                    % Do nothing
-                case 'Cr-Cho'
-                    % Fit a double-Lorentzian to the Cr-Cho area, and phase the spectrum
-                    % with the negative phase of that fit
-                    [raw,globalPhase]       = op_phaseCrCho(raw, 1);
-                    raw.specReg.phs = raw.specReg.phs - globalPhase*180/pi;
-                case 'auto_phase'
-                    [raw,globalPhase]       = op_autophase(raw, MRSCont.opts.MRSI.phase.limits(1),MRSCont.opts.MRSI.phase.limits(2));
-                    raw.specReg.phs = raw.specReg.phs - globalPhase*180/pi;
-                case 'LCM'
-                    load(MRSCont.opts.MRSI.phase.BasisSetFile{1});                   % Assume it is the first one ...
-                    BASIS = recalculateBasisSpecs(BASIS);                         % Add ppm axis and frequency domain data
-                    BASIS = fit_sortBasisSet(BASIS);                              % Sort according to Osprey standard
-                    temp = op_zeropad(raw,2);   
-                    BASIS = fit_resampleBasis(temp, BASIS); 
-                    BASIS.centerFreq = 4.68;
-                    model = Osprey_gLCM(temp,MRSCont.opts.MRSI.phase.ModelProcedureFileMetabolites,0,1,1,0,0,BASIS,1);                                      
-                    refShift = model{1, 1}.Model{1, 1}.parsOut.GlobFreqShift;
-                    [raw]             = op_freqshift(raw,-refShift); 
-                    raw.specs = raw.specs .* (exp(1j .* (model{1, 1}.Model{1, 1}.parsOut.ph0 + model{1, 1}.Model{1, 1}.parsOut.ph1.*raw.ppm)'));
-                    if mod(size(raw.specs,raw.dims.t),2)==0
-                        %disp('Length of vector is even.  Doing normal conversion');
-                        raw.fids=ifft(fftshift(raw.specs,raw.dims.t),[],raw.dims.t);
-                    else
-                        %disp('Length of vector is odd.  Doing circshift by 1');
-                        raw.fids=ifft(circshift(fftshift(raw.specs,raw.dims.t),1),[],raw.dims.t);
-                    end
-            end
+        switch MRSCont.opts.MRSI.phase.type
+            case 'none'
+                % Do nothing
+            case 'first-point'
+                % Do phasing based on the first fid point
+                raw.fids = raw.fids .*conj(raw.fids(1,:,:,:))./abs(raw.fids(1,:,:,:));
+                raw.specs=fftshift(fft(raw.fids,[],raw.dims.t),raw.dims.t);
+            case 'Cr-Cho'
+                % Fit a double-Lorentzian to the Cr-Cho area, and phase the spectrum
+                % with the negative phase of that fit
+                [raw,globalPhase]       = op_phaseCrCho(raw, 1);
+                raw.specReg.phs = raw.specReg.phs - globalPhase*180/pi;
+            case 'auto_phase'
+                [raw,globalPhase]       = op_autophase(raw, MRSCont.opts.MRSI.phase.limits(1),MRSCont.opts.MRSI.phase.limits(2));
+                raw.specReg.phs = raw.specReg.phs - globalPhase*180/pi;
+            case 'LCM'
+                load(MRSCont.opts.MRSI.phase.BasisSetFile{1});                   % Assume it is the first one ...
+                BASIS = recalculateBasisSpecs(BASIS);                         % Add ppm axis and frequency domain data
+                BASIS = fit_sortBasisSet(BASIS);                              % Sort according to Osprey standard
+                temp = op_zeropad(raw,2);   
+                BASIS = fit_resampleBasis(temp, BASIS); 
+                BASIS.centerFreq = 4.68;
+                model = Osprey_gLCM(temp,MRSCont.opts.MRSI.phase.ModelProcedureFileMetabolites,0,1,1,0,0,BASIS,1);                                      
+                refShift = model{1, 1}.Model{1, 1}.parsOut.GlobFreqShift;
+                [raw]             = op_freqshift(raw,-refShift); 
+                raw.specs = raw.specs .* (exp(1j .* (model{1, 1}.Model{1, 1}.parsOut.ph0 + model{1, 1}.Model{1, 1}.parsOut.ph1.*raw.ppm)'));
+                if mod(size(raw.specs,raw.dims.t),2)==0
+                    %disp('Length of vector is even.  Doing normal conversion');
+                    raw.fids=ifft(fftshift(raw.specs,raw.dims.t),[],raw.dims.t);
+                else
+                    %disp('Length of vector is odd.  Doing circshift by 1');
+                    raw.fids=ifft(circshift(fftshift(raw.specs,raw.dims.t),1),[],raw.dims.t);
+                end
         end
 
         
@@ -305,11 +301,7 @@ for kk = 1:MRSCont.nDatasets
                 raw_w.flags.averaged    = 1;
                 raw_w.dims.averages     = 0;
             end
-            if ~MRSCont.flags.isMRSI
-                [raw_w,~]                       = op_eccKlose(raw_w, raw_w);        % Klose eddy current correction
-            else
-                [raw_w,~]=op_autophase(raw_w,2,2*4.68);
-            end
+            [raw_w,~]=op_autophase(raw_w,2,2*4.68);
             [raw_w,~]                       = op_ppmref(raw_w,4.6,4.8,4.68);    % Reference to water @ 4.68 ppm
             
             % Apply some linebroadening, if phantom data

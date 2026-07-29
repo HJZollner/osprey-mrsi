@@ -31,11 +31,12 @@ MRSCont = OspreyMRSI(which(fullfile('exampledata','mrsi','Siemens','TE_40_phanto
 
 %% In Vivo datasets
 MRSCont = OspreyMRSI(which(fullfile('exampledata','mrsi','Philips','TE_70','jobMRSI_TE_70_SPARSDAT.m')),'11');
-MRSCont = OspreyMRSI(which(fullfile('exampledata','mrsi','GE','TE_70','jobMRSI_TE_70_P_NII.m')),'11');
-MRSCont = OspreyMRSI(which(fullfile('exampledata','mrsi','Siemens','TE_280','jobMRSI_TE_280_RDA_NII.m')),'11');
 MRSCont = OspreyMRSI(which(fullfile('exampledata','mrsi','Philips','TE_15','jobMRSI_TE_15_SPARSDAT.m')),'11');
 MRSCont = OspreyMRSI(which(fullfile('exampledata','mrsi','GE','TE_30','jobMRSI_TE_30_P_NII.m')),'11');
+MRSCont = OspreyMRSI(which(fullfile('exampledata','mrsi','GE','TE_70','jobMRSI_TE_70_P_NII.m')),'11');
 MRSCont = OspreyMRSI(which(fullfile('exampledata','mrsi','Siemens','TE_35','jobMRSI_TE_35_RDA_NII.m')),'11');
+MRSCont = OspreyMRSI(which(fullfile('exampledata','mrsi','Siemens','TE_280','jobMRSI_TE_280_RDA_NII.m')),'11');
+
 
 
 

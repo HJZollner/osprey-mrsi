@@ -163,10 +163,11 @@ opts.MRSI.threshBrain = 0.3; % default is 0.3
 polResidNAA = 1; % Polarity NAA
 
 % Options for auto phasing
-opts.MRSI.phase.type = 'none';
+% opts.MRSI.phase.type = 'none';
+opts.MRSI.phase.type = 'first-point';
 % opts.MRSI.phase.type = 'Cr-Cho';
-opts.MRSI.phase.type = 'auto_phase';
-opts.MRSI.phase.limits = [1.7,2.2];
+% opts.MRSI.phase.type = 'auto_phase';
+% opts.MRSI.phase.limits = [1.7,2.2];
 % opts.MRSI.phase.type = 'LCM';
 % opts.MRSI.phase.ModelProcedureFileMetabolites = which('/model-procedures/mrsi/1Step_Spline_invivo_FreqAndPhase.json');
 % opts.MRSI.phase.BasisSetFile = {which('/fit/basissets/mrsi/BASIS_Philips_UnEdited_se_MRSI_PRESS_GABA70_noMM.mat')};
@@ -243,9 +244,10 @@ opts.MRSI.MaxEcho.FreqAlign.zerofill = 1;
 
 %Phasing
 % opts.MRSI.MaxEcho.phase.type = 'none';
+opts.MRSI.MaxEcho.phase.type = 'first-point';
 % opts.MRSI.MaxEcho.phase.type = 'Cr-Cho';
-opts.MRSI.MaxEcho.phase.type = 'auto_phase';
-opts.MRSI.MaxEcho.phase.limits = [1.7,2.2];
+% opts.MRSI.MaxEcho.phase.type = 'auto_phase';
+% opts.MRSI.MaxEcho.phase.limits = [1.7,2.2];
 % opts.MRSI.MaxEcho.phase.type = 'LCM';
 % opts.MRSI.MaxEcho.phase.ModelProcedureFileMetabolites = which('/model-procedures/mrsi/1Step_Spline_invivo_FreqAndPhase_longTE.json');
 % opts.MRSI.MaxEcho.phase.BasisSetFile = {which('/fit/basissets/mrsi/BASIS_Philips_UnEdited_se_MRSI_PRESS_GABA70_noMM.mat')};
@@ -328,7 +330,7 @@ opts.MRSI.RepSpectra.fGMpfWM = 0.8;
 % to use and which metabolites to include.
 opts.MRSI.GlobalConc.SliceIndices = [1];
 opts.MRSI.GlobalConc.fGMpfWM = 0.8;
-opts.MRSI.GlobalConc.metabolites = {'tNAA_Acetyl','tCho_pCh2','tCr_methyl'};
+opts.MRSI.GlobalConc.metabolites = {'tNAA_Acetyl','tCho_methyl','tCr_methyl'};
 opts.MRSI.GlobalConc.quantities = {'TissCorrWaterScaled'};
 
 % You can also visualize the atlas analysis in an interactive plot by

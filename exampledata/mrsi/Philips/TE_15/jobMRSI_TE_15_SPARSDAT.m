@@ -164,9 +164,10 @@ polResidNAA = 1; % Polarity NAA
 
 % Options for auto phasing
 % opts.MRSI.phase.type = 'none';
+opts.MRSI.phase.type = 'first-point';
 % opts.MRSI.phase.type = 'Cr-Cho';
-opts.MRSI.phase.type = 'auto_phase';
-opts.MRSI.phase.limits = [1.7,2.2];
+% opts.MRSI.phase.type = 'auto_phase';
+% opts.MRSI.phase.limits = [1.7,2.2];
 % opts.MRSI.phase.type = 'LCM';
 % opts.MRSI.phase.ModelProcedureFileMetabolites = which('/model-procedures/mrsi/1Step_Spline_invivo_FreqAndPhase.json');
 % opts.MRSI.phase.BasisSetFile = {which('/fit/basissets/mrsi/BASIS_Philips_UnEdited_se_MRSI_PRESS_GABA15_noMM.mat')};
@@ -176,16 +177,16 @@ opts.MRSI.phase.limits = [1.7,2.2];
 % opts.MRSI.NuisanceRemoval.water.type = 'none';
 
 % HSVD water removal
-% opts.MRSI.NuisanceRemoval.water.type = 'HSVD';
-% opts.MRSI.NuisanceRemoval.water.comp = 32; % Max number of components removed in HSVD
+opts.MRSI.NuisanceRemoval.water.type = 'HSVD';
+opts.MRSI.NuisanceRemoval.water.comp = 32; % Max number of components removed in HSVD
 
 % L2 removal with simulated water basis functions
-opts.MRSI.NuisanceRemoval.water.type = 'L2-basis';
-opts.MRSI.NuisanceRemoval.water.basisArguments.Components = 2000;
-opts.MRSI.NuisanceRemoval.water.basisArguments.lineWidthRange= [10 80];
-opts.MRSI.NuisanceRemoval.water.basisArguments.PPMRange = [4.2 5.1];
-opts.MRSI.NuisanceRemoval.water.basisArguments.beta = 10;
-opts.MRSI.NuisanceRemoval.water.basisArguments.plotBasis = false;
+% opts.MRSI.NuisanceRemoval.water.type = 'L2-basis';
+% opts.MRSI.NuisanceRemoval.water.basisArguments.Components = 2000;
+% opts.MRSI.NuisanceRemoval.water.basisArguments.lineWidthRange= [10 80];
+% opts.MRSI.NuisanceRemoval.water.basisArguments.PPMRange = [4.2 5.1];
+% opts.MRSI.NuisanceRemoval.water.basisArguments.beta = 10;
+% opts.MRSI.NuisanceRemoval.water.basisArguments.plotBasis = false;
 
 % No lipid removal
 % opts.MRSI.NuisanceRemoval.lipid.type = 'none';
@@ -227,27 +228,6 @@ opts.MRSI.FreqAlign.lim = [1.85,4];
 opts.MRSI.FreqAlign.realpart = 0;
 opts.MRSI.FreqAlign.zerofill = 0;
 
-
-
-% Flags for maximum echo processing
-opts.MRSI.MaxEcho.separate = 0;
-
-% Cross-correlation alignment of frequencies defined below
-% opts.MRSI.MaxEcho.FreqAlign.type = 'CC';
-% opts.MRSI.MaxEcho.FreqAlign.frequencies = [3.03,3.22,3.9];
-% opts.MRSI.MaxEcho.FreqAlign.polarity = [1,1,1];
-% opts.MRSI.MaxEcho.FreqAlign.lim = [2.5,4.5];
-% opts.MRSI.MaxEcho.FreqAlign.realpart = 1;
-% opts.MRSI.MaxEcho.FreqAlign.zerofill = 1;
-
-% Cross-correlation alignment of frequencies defined below after Wavelet filter of baseline if lipid/noise > thresh
-% opts.MRSI.MaxEcho.FreqAlign.type = 'CCwithLipRemoval';
-% opts.MRSI.MaxEcho.FreqAlign.thresh = 10;
-% opts.MRSI.MaxEcho.FreqAlign.frequencies = [2.01,3.03,3.22,3.9];
-% opts.MRSI.MaxEcho.FreqAlign.polarity = [1,1,1,1];
-% opts.MRSI.MaxEcho.FreqAlign.lim = [1.85,4.2];
-% opts.MRSI.MaxEcho.FreqAlign.realpart = 0;
-% opts.MRSI.MaxEcho.FreqAlign.zerofill = 1;
 
 % This will generate amplitude integral maps for quick inspection. You can
 % define different regions and spectra to be used.

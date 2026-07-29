@@ -164,9 +164,10 @@ polResidNAA = 1; % Polarity NAA
 
 % Options for auto phasing
 % opts.MRSI.phase.type = 'none';
+opts.MRSI.phase.type = 'first-point';
 % opts.MRSI.phase.type = 'Cr-Cho';
-opts.MRSI.phase.type = 'auto_phase';
-opts.MRSI.phase.limits = [1.7,2.2];
+% opts.MRSI.phase.type = 'auto_phase';
+% opts.MRSI.phase.limits = [1.7,2.2];
 % opts.MRSI.phase.type = 'LCM';
 % opts.MRSI.phase.ModelProcedureFileMetabolites = which('/model-procedures/mrsi/1Step_Spline_invivo_FreqAndPhase.json');
 % opts.MRSI.phase.BasisSetFile = {which('/fit/basissets/mrsi/BASIS_Siemens_UnEdited_PRESS_GABA35_noMM.mat')};

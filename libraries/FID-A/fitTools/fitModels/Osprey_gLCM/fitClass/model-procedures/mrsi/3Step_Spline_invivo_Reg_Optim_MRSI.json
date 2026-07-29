@@ -246,11 +246,6 @@
             "Step 1"
           ]
         },
-        "gaussLB": {
-          "init": [
-            "Step 1"
-          ]
-        },
         "metAmpl": {
         "sc":{
               "adj": [["CrCH2","NAAG","MM20","MM31","MM37","MM38","MM40","Asp","GABA","sI","Tau"]],

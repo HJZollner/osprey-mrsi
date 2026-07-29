@@ -120,22 +120,22 @@ saveas(gcf,'Figure_2_mask.pdf','pdf');
 saveas(gcf,'Figure_2_mask.fig','fig');
 close(gcf);
 
-% Spectra [23,19,2;13,12,2]
-out = osp_plotSpecAndLocMRSI(MRSCont,[25,21,4;15,19,4], 'T1w_rMRSIloc','OspreyLoad','AFID','Fit3D',0,0,0,0,1);
+% Spectra [25,23,4;15,19,4
+out = osp_plotSpecAndLocMRSI(MRSCont,[25,23,4;15,19,4], 'T1w_rMRSIloc','OspreyLoad','AFID','Fit3D',0,0,0,0,1);
 set(gcf, 'units','normalized','outerposition',[0 0 1 0.66]);
 set(gcf,'Renderer', 'painters');
 saveas(gcf,'Figure_2_Raw.pdf','pdf');
 saveas(gcf,'Figure_2_Raw.fig','fig');
 close(gcf);
 
-out = osp_plotSpecAndLocMRSI(MRSCont,[25,21,4;15,19,4], 'T1w_rMRSIloc','OspreyProcess','AFID','Fit3D',0,0,0,0,1);
+out = osp_plotSpecAndLocMRSI(MRSCont,[25,23,4;15,19,4], 'T1w_rMRSIloc','OspreyProcess','AFID','Fit3D',0,0,0,0,1);
 set(gcf, 'units','normalized','outerposition',[0 0 1 0.66]);
 set(gcf,'Renderer', 'painters');
 saveas(gcf,'Figure_2_Proc.pdf','pdf');
 saveas(gcf,'Figure_2_Proc.fig','fig');
 close(gcf);
 
-out = osp_plotSpecAndLocMRSI(MRSCont,[25,21,4;15,19,4], 'T1w_rMRSIloc','OspreyFit','metab','Fit1DStack',0,0,0,0,1);
+out = osp_plotSpecAndLocMRSI(MRSCont,[25,23,4;15,19,4], 'T1w_rMRSIloc','OspreyFit','metab','Fit1DStack',0,0,0,0,1);
 set(gcf, 'units','normalized','outerposition',[0 0 1 0.66]);
 set(gcf,'Renderer', 'painters');
 saveas(gcf,'Figure_2_Fit.pdf','pdf');
