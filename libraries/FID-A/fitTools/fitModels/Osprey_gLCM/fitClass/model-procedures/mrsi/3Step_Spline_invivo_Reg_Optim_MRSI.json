@@ -44,13 +44,7 @@
           "ex": 5.11,
           "sd":0.2
         },
-          "lorentzLB": {
-          "gr":{"g1":["Asc","Asp","Cr","CrCH2","GABA","GPC","GSH","Gln","Glu","mI","NAA",
-          "NAAG","PCh","PCr","PE","sI","Tau"]}
-        },
         "freqShift": {
-          "gr":{"g1":["Asc","Asp","Cr","CrCH2","GABA","GPC","GSH","Gln","Glu","mI","NAA",
-          "NAAG","PCh","PCr","PE","sI","Tau"]},
             "lb": -0.01,
             "ub":0.01
         },
@@ -155,9 +149,7 @@
           ],
           "lb": [
             "Step 1"
-          ],
-          "gr":{"g1":["Asc","Asp","Cr","CrCH2","GABA","GPC","GSH","Gln","Glu","mI","NAA",
-          "NAAG","PCh","PCr","PE","sI","Tau","MM20","MM31","MM37","MM38","MM40","Lip20"]}
+          ]
         },
         "freqShift": {
           "init": [
@@ -168,9 +160,7 @@
           ],
           "lb": [
             "Step 1"
-          ],
-          "gr":{"g1":["Asc","Asp","Cr","CrCH2","GABA","GPC","GSH","Gln","Glu","mI","NAA",
-          "NAAG","PCh","PCr","PE","sI","Tau","MM20","MM31","MM37","MM38","MM40","Lip20"]}
+          ]
         },
         "metAmpl": {
         "sc":{

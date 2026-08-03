@@ -143,12 +143,12 @@ saveas(gcf,'Figure_2_Fit.fig','fig');
 close(gcf);
 
 % QC maps
-out = osp_plotMetabolitemapsOverlay(MRSCont,'GlobalQC','QC',slice,slice,1,1,'T1w_rMRSIloc',0.8,1);
+out = osp_plotMetabolitemapsOverlay(MRSCont,'GlobalQC','QC',slice,slice,1,1,0,'T1w_rMRSIloc',0.8,1);
 set(gcf,'Renderer', 'painters');
 saveas(gcf,'Figure_2_GlobalQC_colorbar.pdf','pdf');
 saveas(gcf,'Figure_2_GlobalQC_colorbar.fig','fig');
 close(gcf);
-out = osp_plotMetabolitemapsOverlay(MRSCont,'GlobalQC','QC',slice,slice,1,1,'T1w_rMRSIloc',0.8,0);
+out = osp_plotMetabolitemapsOverlay(MRSCont,'GlobalQC','QC',slice,slice,1,1,0,'T1w_rMRSIloc',0.8,0);
 set(gcf,'Renderer', 'painters');
 saveas(gcf,'Figure_2_GlobalQC.pdf','pdf');
 saveas(gcf,'Figure_2_GlobalQC.fig','fig');
@@ -194,7 +194,7 @@ set(gcf,'Renderer', 'painters');
 saveas(gcf,'Figure_2_tNAA_CRLBs.pdf','pdf');
 saveas(gcf,'Figure_2_tNAA_CRLBs.fig','fig');
 close(gcf);
-out = osp_plotMetabolitemapsOverlay(MRSCont,'CRLBs','tNAA_Acetyl',slice,slice,1,10,1,'T1w_rMRSIloc',0.8,1);
+out = osp_plotMetabolitemapsOverlay(MRSCont,'CRLBs','tNAA_Acetyl',slice,slice,1,5,1,'T1w_rMRSIloc',0.8,1);
 set(gcf,'Renderer', 'painters');
 saveas(gcf,'Figure_2_tNAA_cbar_CRLBs.pdf','pdf');
 saveas(gcf,'Figure_2_tNAA_cbar_CRLBs.fig','fig');
@@ -231,7 +231,7 @@ close(gcf);
 
 
 % Global
-out = osp_plotGlobalConcentration(MRSCont,'tCho_pCh2_only','TissCorrWaterScaled');
+out = osp_plotGlobalConcentration(MRSCont,'tCho_methyl','TissCorrWaterScaled');
 set(gcf,'Renderer', 'painters');
 saveas(gcf,'Figure_2_tCho_GlobalConc.pdf','pdf');
 saveas(gcf,'Figure_2_tCho_GlobalConc.fig','fig');

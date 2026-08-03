@@ -242,7 +242,7 @@ switch parameter                                            % Parameter switch w
         parametrizations.gradfun = 'free';
         parametrizations.lb      = 0;
         parametrizations.ub      = Inf;
-        parametrizations.init    = 0.00000001;
+        parametrizations.init    = 0;
         parametrizations.ex      = 0;
         parametrizations.sd      = Inf;
         parametrizations.RegFun  = '';

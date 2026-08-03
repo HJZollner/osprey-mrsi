@@ -45,11 +45,7 @@
           "ex": 5.11,
           "sd":0.2
         },
-          "lorentzLB": {
-          "gr":{"g1":["GABAp","GSH","Glu","Gln","NAA","NAAG"]}
-        },
         "freqShift": {
-          "gr":{"g1":["GABAp","GSH","Glu","Gln","NAA","NAAG"]},
             "lb": -0.01,
             "ub":0.01
         },
@@ -152,8 +148,7 @@
           ],
           "lb": [
             "Step 1"
-          ],
-          "gr":{"g1":["GABAp","GSH","Glu","Gln","NAA","NAAG"]}
+          ]
         },
         "freqShift": {
           "init": [
@@ -164,8 +159,7 @@
           ],
           "lb": [
             "Step 1"
-          ],
-          "gr":{"g1":["GABAp","GSH","Glu","Gln","NAA","NAAG"]}
+          ]
         },
         "metAmpl": {
         "sc":{
