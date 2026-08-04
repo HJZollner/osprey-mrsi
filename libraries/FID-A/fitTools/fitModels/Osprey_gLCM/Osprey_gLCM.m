@@ -1,4 +1,4 @@
-function [ModelParameter] = Osprey_gLCM(DataToModel, JsonModelFile, average, noZF, scaleData, NumericJacobian, CheckGradient, BasisSetStruct, nonVerbose)
+function [ModelParameter] = Osprey_gLCM(DataToModel, JsonModelFile, average, noZF, scaleData, NumericJacobian, CheckGradient, BasisSetStruct, nonVerbose, economizeStorage)
 %% Global function for new Osprey LCM
 % Inputs:   DataToModel     - FID-A/Osprey struct with data or cell of structs
 %           JsonModelFile   - Master model file for all steps
@@ -29,6 +29,7 @@ arguments
     CheckGradient double {mustBeNumeric} = 0;       % optional
     BasisSetStruct struct = [];                     % optional
     nonVerbose double = 0;                          % optional
+    economizeStorage double = 0;                    % optional
 end
 
 % If input is just a single struct, move it into a cell array
@@ -466,7 +467,12 @@ end
 for kk = 2 : size(ModelParameter,1)
     ModelParameter{kk,1}.economizeStorage(1,1);                         % Remove basis set and jacobians
 end
-ModelParameter{1,1}.economizeStorage(0,1);                              % Keep first basis set but no jacobians
+if economizeStorage
+    ModelParameter{1,1}.economizeStorage(1,1);                              % Keep first basis set but no jacobians
+else
+    ModelParameter{1,1}.economizeStorage(0,1);                              % Keep first basis set but no jacobians
+
+end
 
 end
 

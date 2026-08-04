@@ -87,7 +87,8 @@ if MRSCont.flags.hasWater
                 [~, refFWHM] = osp_XReferencing(data_vec{vx},4.68,1,[0 9.36],0);
                 data_vec{vx}.FWHM = refFWHM * data_vec{vx}.txfrq*1e-6;
                 fields = {'nXvoxels','nYvoxels','nZvoxels','seq','PatientPosition',...
-                                'Manufacturer','OriginalFile','software','nii_mrs'};
+                                'Manufacturer','OriginalFile','software','nii_mrs',...
+                                'software','geometry','pointsToLeftshift','rawSubspecs','rawAverages'};
                     data_vec{vx} = rmfield(data_vec{vx},fields);
             end
             WaitMessage.Send;
@@ -197,9 +198,8 @@ if MRSCont.flags.hasWater
         S = parallel.pool.Constant(scaleData);
         B = parallel.pool.Constant(BASIS);
 
-        parfor vx = 1:  length(data_vec)
-                water(vx) = Osprey_gLCM(data_vec(vx),M.Value{vx},0,~zero_fill,S.Value,0,0,B.Value,1);
-                water{vx}.economizeStorage(1,1);                         % Remove basis set and jacobians
+        parfor vx = 1:  length(data_vec)            
+                water(vx) = Osprey_gLCM(data_vec(vx),M.Value{vx},0,~zero_fill,S.Value,0,0,B.Value,1,1);
                 WaitMessage.Send;
         end
         WaitMessage.Destroy;
@@ -215,8 +215,7 @@ if MRSCont.flags.hasWater
         water = water_temp;
     else        % Sequential processing
         for vx = 1:  length(data_vec)
-                water(vx) = Osprey_gLCM(data_vec(vx),ModelProcedureCell{vx},0,~zero_fill,scaleData,0,0,BASIS,1);
-                water{vx}.economizeStorage(1,1);                         % Remove basis set and jacobians
+                water(vx) = Osprey_gLCM(data_vec(vx),ModelProcedureCell{vx},0,~zero_fill,scaleData,0,0,BASIS,1,1);
                 WaitMessage.Send;
         end
         WaitMessage.Destroy;
@@ -253,14 +252,16 @@ end
         for x = 1 : MRSCont.processed.(MetabSpecName){1}.nXvoxels
             for y = 1 : MRSCont.processed.(MetabSpecName){1}.nYvoxels
                 data_vec{ind}=op_takeVoxel(MRSCont.processed.(MetabSpecName){1},[x y z]);
-                if isfield('watersupp',data_vec{ind})
+                if isfield(data_vec{ind},'watersupp')
                     fields = {'nXvoxels','nYvoxels','nZvoxels','seq',...
                                 'nii_mrs','specReg','watersupp',...
-                                'refFWHM','refShift'};
+                                'refFWHM','refShift',...
+                                'software','geometry','pointsToLeftshift','rawSubspecs','rawAverages'};
                 else
                     fields = {'nXvoxels','nYvoxels','nZvoxels','seq',...
                                 'nii_mrs','specReg',...
-                                'refFWHM','refShift'};
+                                'refFWHM','refShift',...
+                                'software','geometry','pointsToLeftshift','rawSubspecs','rawAverages'};
                 end
                 data_vec{ind} = rmfield(data_vec{ind},fields); 
                 data_vec{ind}.centerFreq = data_vec{ind}.centerFreq(1);
@@ -364,8 +365,7 @@ end
         B = parallel.pool.Constant(BASIS);
 
         parfor vx = 1:  length(data_vec)
-                model(vx) = Osprey_gLCM(data_vec(vx),M.Value{1},0,~zero_fill,S.Value,0,0,B.Value,1);
-                model{vx}.economizeStorage(1,1);                         % Remove basis set and jacobians
+                model(vx) = Osprey_gLCM(data_vec(vx),M.Value{1},0,~zero_fill,S.Value,0,0,B.Value,1,1);
                 WaitMessage.Send;
         end
         WaitMessage.Destroy;
@@ -379,8 +379,7 @@ end
         model = model_temp;       
     else    % Sequential processing
         for vx = 1:  length(data_vec)
-                model(vx) = Osprey_gLCM(data_vec(vx),ModelProcedureCell{1},0,~zero_fill,scaleData,0,0,BASIS,1);
-                model{vx}.economizeStorage(1,1);                         % Remove basis set and jacobians 
+                model(vx) = Osprey_gLCM(data_vec(vx),ModelProcedureCell{1},0,~zero_fill,scaleData,0,0,BASIS,1,1);
                 WaitMessage.Send;
         end
         WaitMessage.Destroy;
