@@ -87,7 +87,8 @@ if MRSCont.flags.hasWater
                 [~, refFWHM] = osp_XReferencing(data_vec{vx},4.68,1,[0 9.36],0);
                 data_vec{vx}.FWHM = refFWHM * data_vec{vx}.txfrq*1e-6;
                 fields = {'nXvoxels','nYvoxels','nZvoxels','seq','PatientPosition',...
-                                'Manufacturer','OriginalFile','software','nii_mrs'};
+                                'Manufacturer','OriginalFile','nii_mrs',...
+                                'geometry','rawSubspecs','rawAverages'};
                     data_vec{vx} = rmfield(data_vec{vx},fields);
             end
             WaitMessage.Send;
@@ -193,19 +194,14 @@ if MRSCont.flags.hasWater
     % Run water model
     WaitMessage = parfor_wait(length(data_vec),'Waitbar',true,'ReportInterval',round(length(data_vec)/20),'CurrentStep','Model Water');
     if parallel_flag      % Parallel processing
-        % p = parpool();
-        D = parallel.pool.Constant(data_vec);
         M = parallel.pool.Constant(ModelProcedureCell);
         S = parallel.pool.Constant(scaleData);
+        B = parallel.pool.Constant(BASIS);
 
-
-        tstart = tic;
-        parfor vx = 1:  length(data_vec)
-                water(vx) = Osprey_gLCM(D.Value(vx),M.Value{vx},0,~zero_fill,S.Value,0,0,BASIS,1);
-                water{vx}.economizeStorage(1,1);                         % Remove basis set and jacobians
+        parfor vx = 1:  length(data_vec)            
+                water(vx) = Osprey_gLCM(data_vec(vx),M.Value{vx},0,~zero_fill,S.Value,0,0,B.Value,1,1);
                 WaitMessage.Send;
         end
-        modeltime_water = toc(tstart);
         WaitMessage.Destroy;
         % delete(p);
         water_temp = cell(MRSCont.processed.w{1}.nXvoxels,MRSCont.processed.w{1}.nYvoxels,MRSCont.processed.w{1}.nZvoxels);
@@ -218,14 +214,11 @@ if MRSCont.flags.hasWater
         end
         water = water_temp;
     else        % Sequential processing
-        tstart = tic;
         for vx = 1:  length(data_vec)
-                water(vx) = Osprey_gLCM(data_vec(vx),ModelProcedureCell{vx},0,~zero_fill,scaleData,0,0,BASIS,1);
-                water{vx}.economizeStorage(1,1);                         % Remove basis set and jacobians
+                water(vx) = Osprey_gLCM(data_vec(vx),ModelProcedureCell{vx},0,~zero_fill,scaleData,0,0,BASIS,1,1);
                 WaitMessage.Send;
         end
         WaitMessage.Destroy;
-        modeltime_water = toc(tstart);
         water_temp = cell(MRSCont.processed.w{1}.nXvoxels,MRSCont.processed.w{1}.nYvoxels,MRSCont.processed.w{1}.nZvoxels);
 
         % Reorder the results into a matrix
@@ -259,14 +252,16 @@ end
         for x = 1 : MRSCont.processed.(MetabSpecName){1}.nXvoxels
             for y = 1 : MRSCont.processed.(MetabSpecName){1}.nYvoxels
                 data_vec{ind}=op_takeVoxel(MRSCont.processed.(MetabSpecName){1},[x y z]);
-                if isfield('watersupp',data_vec{ind})
+                if isfield(data_vec{ind},'watersupp')
                     fields = {'nXvoxels','nYvoxels','nZvoxels','seq',...
                                 'nii_mrs','specReg','watersupp',...
-                                'refFWHM','refShift'};
+                                'refFWHM','refShift',...
+                                'geometry','rawSubspecs','rawAverages'};
                 else
                     fields = {'nXvoxels','nYvoxels','nZvoxels','seq',...
                                 'nii_mrs','specReg',...
-                                'refFWHM','refShift'};
+                                'refFWHM','refShift',...
+                                'geometry','rawSubspecs','rawAverages'};
                 end
                 data_vec{ind} = rmfield(data_vec{ind},fields); 
                 data_vec{ind}.centerFreq = data_vec{ind}.centerFreq(1);
@@ -364,18 +359,16 @@ end
 
     WaitMessage = parfor_wait(length(data_vec),'Waitbar',true,'ReportInterval',round(length(data_vec)/20),'CurrentStep','Model Metabolites');
     if parallel_flag % Parallel computing
-        % p = parpool();
-        D = parallel.pool.Constant(data_vec);
+
         M = parallel.pool.Constant(ModelProcedureCell);
         S = parallel.pool.Constant(scaleData);
-        tstart = tic;
+        B = parallel.pool.Constant(BASIS);
+
         parfor vx = 1:  length(data_vec)
-                model(vx) = Osprey_gLCM(D.Value(vx),M.Value{1},0,~zero_fill,S.Value,0,0,BASIS,1);
-                model{vx}.economizeStorage(1,1);                         % Remove basis set and jacobians
+                model(vx) = Osprey_gLCM(data_vec(vx),M.Value{1},0,~zero_fill,S.Value,0,0,B.Value,1,1);
                 WaitMessage.Send;
         end
         WaitMessage.Destroy;
-        modeltime_final_none = toc(tstart);
         delete(p);
         model_temp = cell(MRSCont.processed.(MetabSpecName){1}.nXvoxels,MRSCont.processed.(MetabSpecName){1}.nYvoxels,MRSCont.processed.(MetabSpecName){1}.nZvoxels);
 
@@ -385,14 +378,11 @@ end
         end
         model = model_temp;       
     else    % Sequential processing
-        tstart = tic;
         for vx = 1:  length(data_vec)
-                model(vx) = Osprey_gLCM(data_vec(vx),ModelProcedureCell{1},0,~zero_fill,scaleData,0,0,BASIS,1);
-                model{vx}.economizeStorage(1,1);                         % Remove basis set and jacobians 
+                model(vx) = Osprey_gLCM(data_vec(vx),ModelProcedureCell{1},0,~zero_fill,scaleData,0,0,BASIS,1,1);
                 WaitMessage.Send;
         end
         WaitMessage.Destroy;
-        modeltime_final_none = toc(tstart);
         model_temp = cell(MRSCont.processed.(MetabSpecName){1}.nXvoxels,MRSCont.processed.(MetabSpecName){1}.nYvoxels,MRSCont.processed.(MetabSpecName){1}.nZvoxels);
 
         % Reorder the results into a matrix

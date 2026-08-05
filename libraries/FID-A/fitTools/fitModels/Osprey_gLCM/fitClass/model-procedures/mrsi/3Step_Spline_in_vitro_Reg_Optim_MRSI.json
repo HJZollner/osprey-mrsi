@@ -43,13 +43,7 @@
           "ex": 5.11,
           "sd":0.2
         },
-          "lorentzLB": {
-            "gr":{"g1":["Cr","CrCH2","GABA","GPC","Gln","Glu","mI","Lac","NAA",
-            "NAAG","PCh","PCr"]}
-        },
         "freqShift": {
-          "gr":{"g1":["Cr","CrCH2","GABA","GPC","Gln","Glu","mI","Lac","NAA",
-          "NAAG","PCh","PCr"]},
             "lb": -0.01,
             "ub":0.01
         },
@@ -153,9 +147,7 @@
           ],
           "lb": [
             "Step 1"
-          ],
-          "gr":{"g1":["Cr","CrCH2","GABA","GPC","Gln","Glu","mI","Lac","NAA",
-          "NAAG","PCh","PCr"]}
+          ]
         },
         "freqShift": {
           "init": [
@@ -166,9 +158,7 @@
           ],
           "lb": [
             "Step 1"
-          ],
-          "gr":{"g1":["Cr","CrCH2","GABA","GPC","Gln","Glu","mI","Lac","NAA",
-          "NAAG","PCh","PCr"]}
+          ]
         }
       },
       "regularizer": {

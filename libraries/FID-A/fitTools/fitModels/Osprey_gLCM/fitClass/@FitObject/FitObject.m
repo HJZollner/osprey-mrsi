@@ -1,4 +1,4 @@
-classdef FitObject < handle
+classdef FitObject < handle & matlab.mixin.Copyable
 %%  FitObject
 %   This is the class defintion for the OspreyFitObj. This is the
 %   center-piece of the new fit formalism in Osprey
@@ -189,8 +189,20 @@ classdef FitObject < handle
                         obj.BaselineBasis = [];                             % Store empty baseline array in object 
                 end
             end     
-        end                                                    
+        end   
+
+        function destroy(obj)
+            % Manual cleanup method for parfor usage
+            obj.BasisSets = [];
+            obj.Data = [];
+            obj.Options = [];
+            % Clear other large properties
+            
+            % Call handle destructor
+            destroy@handle(obj);
+        end
     end
+    
         
     % Static methods, helper functions
     methods (Static)

@@ -328,7 +328,7 @@ opts.MRSI.RepSpectra.fGMpfWM = 0.8;
 % include and the masking parameter of fGM + fWM per voxel. Only MRSI
 % voxels greater then the threshold will be included. Which quantification
 % to use and which metabolites to include.
-opts.MRSI.GlobalConc.SliceIndices = [1];
+opts.MRSI.GlobalConc.SliceIndices = [3];
 opts.MRSI.GlobalConc.fGMpfWM = 0.8;
 opts.MRSI.GlobalConc.metabolites = {'tNAA_Acetyl','tCho_methyl','tCr_methyl'};
 opts.MRSI.GlobalConc.quantities = {'TissCorrWaterScaled'};

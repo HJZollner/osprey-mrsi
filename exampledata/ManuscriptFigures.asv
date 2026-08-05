@@ -166,52 +166,52 @@ saveas(gcf,'Figure_2_tNAA_cbar.pdf','pdf');
 saveas(gcf,'Figure_2_tNAA_cbar.fig','fig');
 close(gcf);
 
-out = osp_plotMetabolitemapsOverlay(MRSCont,'TissCorrWaterScaled','tCr_methyl',slice,slice,1,16,0,'T1w_rMRSIloc',0.8,0);
+out = osp_plotMetabolitemapsOverlay(MRSCont,'TissCorrWaterScaled','tCr_methyl',slice,slice,1,20,0,'T1w_rMRSIloc',0.8,0);
 set(gcf,'Renderer', 'painters');
 saveas(gcf,'Figure_2_tCr.pdf','pdf');
 saveas(gcf,'Figure_2_tCr.fig','fig');
 close(gcf);
-out = osp_plotMetabolitemapsOverlay(MRSCont,'TissCorrWaterScaled','tCr_methyl',slice,slice,1,16,0,'T1w_rMRSIloc',0.8,1);
+out = osp_plotMetabolitemapsOverlay(MRSCont,'TissCorrWaterScaled','tCr_methyl',slice,slice,1,10,0,'T1w_rMRSIloc',0.8,1);
 set(gcf,'Renderer', 'painters');
 saveas(gcf,'Figure_2_tCr_cbar.pdf','pdf');
 saveas(gcf,'Figure_2_tCr_cbar.fig','fig');
 close(gcf);
 
-out = osp_plotMetabolitemapsOverlay(MRSCont,'TissCorrWaterScaled','tCho_methyl',slice,slice,1,4,0,'T1w_rMRSIloc',0.8,0);
+out = osp_plotMetabolitemapsOverlay(MRSCont,'TissCorrWaterScaled','tCho_methyl',slice,slice,1,2,0,'T1w_rMRSIloc',0.8,0);
 set(gcf,'Renderer', 'painters');
 saveas(gcf,'Figure_2_tCho.pdf','pdf');
 saveas(gcf,'Figure_2_tCho.fig','fig');
 close(gcf);
-out = osp_plotMetabolitemapsOverlay(MRSCont,'TissCorrWaterScaled','tCho_methyl',slice,slice,1,4,0,'T1w_rMRSIloc',0.8,1);
+out = osp_plotMetabolitemapsOverlay(MRSCont,'TissCorrWaterScaled','tCho_methyl',slice,slice,1,2,0,'T1w_rMRSIloc',0.8,1);
 set(gcf,'Renderer', 'painters');
 saveas(gcf,'Figure_2_tCho_cbar.pdf','pdf');
 saveas(gcf,'Figure_2_tCho_cbar.fig','fig');
 close(gcf);
 
 % CRLB
-out = osp_plotMetabolitemapsOverlay(MRSCont,'CRLBs','tNAA_Acetyl',slice,slice,1,15,1,'T1w_rMRSIloc',0.8,0);
+out = osp_plotMetabolitemapsOverlay(MRSCont,'CRLBs','tNAA_Acetyl',slice,slice,1,10,1,'T1w_rMRSIloc',0.8,0);
 set(gcf,'Renderer', 'painters');
 saveas(gcf,'Figure_2_tNAA_CRLBs.pdf','pdf');
 saveas(gcf,'Figure_2_tNAA_CRLBs.fig','fig');
 close(gcf);
-out = osp_plotMetabolitemapsOverlay(MRSCont,'CRLBs','tNAA_Acetyl',slice,slice,1,15,1,'T1w_rMRSIloc',0.8,1);
+out = osp_plotMetabolitemapsOverlay(MRSCont,'CRLBs','tNAA_Acetyl',slice,slice,1,5,1,'T1w_rMRSIloc',0.8,1);
 set(gcf,'Renderer', 'painters');
 saveas(gcf,'Figure_2_tNAA_cbar_CRLBs.pdf','pdf');
 saveas(gcf,'Figure_2_tNAA_cbar_CRLBs.fig','fig');
 close(gcf);
 
-out = osp_plotMetabolitemapsOverlay(MRSCont,'CRLBs','tCr_methyl',slice,slice,1,15,1,'T1w_rMRSIloc',0.8,0);
+out = osp_plotMetabolitemapsOverlay(MRSCont,'CRLBs','tCr_methyl',slice,slice,1,25,1,'T1w_rMRSIloc',0.8,0);
 set(gcf,'Renderer', 'painters');
 saveas(gcf,'Figure_2_tCr_CRLBs.pdf','pdf');
 saveas(gcf,'Figure_2_tCr_CRLBs.fig','fig');
 close(gcf);
-out = osp_plotMetabolitemapsOverlay(MRSCont,'CRLBs','tCr_methyl',slice,slice,1,15,1,'T1w_rMRSIloc',0.8,1);
+out = osp_plotMetabolitemapsOverlay(MRSCont,'CRLBs','tCr_methyl',slice,slice,1,25,1,'T1w_rMRSIloc',0.8,1);
 set(gcf,'Renderer', 'painters');
 saveas(gcf,'Figure_2_tCr_cbar_CRLBs.pdf','pdf');
 saveas(gcf,'Figure_2_tCr_cbar_CRLBs.fig','fig');
 close(gcf);
 
-out = osp_plotMetabolitemapsOverlay(MRSCont,'CRLBs','tCho_methyl',slice,slice,1,15,1,'T1w_rMRSIloc',0.8,0);
+out = osp_plotMetabolitemapsOverlay(MRSCont,'CRLBs','tCho_methyl',slice,slice,1,50,1,'T1w_rMRSIloc',0.8,0);
 set(gcf,'Renderer', 'painters');
 saveas(gcf,'Figure_2_tCho_CRLBs.pdf','pdf');
 saveas(gcf,'Figure_2_tCho_CRLBs.fig','fig');
@@ -258,12 +258,12 @@ close(gcf);
 
 
 % Metabolite maps
-out = osp_plotMetabolitemapsOverlay(MRSCont,'TissCorrWaterScaled','tNAA',3,4,1,35,0,'T1w_rMRSIloc',0.8,0);
+out = osp_plotMetabolitemapsOverlay(MRSCont,'TissCorrWaterScaled','tNAA',3,4,1,30,0,'T1w_rMRSIloc',0.8,0);
 set(gcf,'Renderer', 'painters');
 saveas(gcf,'Figure_3_tNAA.pdf','pdf');
 saveas(gcf,'Figure_3_tNAA.fig','fig');
 close(gcf);
-out = osp_plotMetabolitemapsOverlay(MRSCont,'TissCorrWaterScaled','tNAA',3,4,1,35,0,'T1w_rMRSIloc',0.8,1);
+out = osp_plotMetabolitemapsOverlay(MRSCont,'TissCorrWaterScaled','tNAA',3,4,1,30,0,'T1w_rMRSIloc',0.8,1);
 set(gcf,'Renderer', 'painters');
 saveas(gcf,'Figure_3_tNAA_cbar.pdf','pdf');
 saveas(gcf,'Figure_3_tNAA_cbar.fig','fig');
@@ -291,12 +291,12 @@ saveas(gcf,'Figure_3_tCho_cbar.pdf','pdf');
 saveas(gcf,'Figure_3_tCho_cbar.fig','fig');
 close(gcf);
 
-out = osp_plotMetabolitemapsOverlay(MRSCont,'TissCorrWaterScaled','mI',3,4,1,15,0,'T1w_rMRSIloc',0.8,0);
+out = osp_plotMetabolitemapsOverlay(MRSCont,'TissCorrWaterScaled','mI',3,4,1,12,0,'T1w_rMRSIloc',0.8,0);
 set(gcf,'Renderer', 'painters');
 saveas(gcf,'Figure_3_mI.pdf','pdf');
 saveas(gcf,'Figure_3_mI.fig','fig');
 close(gcf);
-out = osp_plotMetabolitemapsOverlay(MRSCont,'TissCorrWaterScaled','mI',3,4,1,15,0,'T1w_rMRSIloc',0.8,1);
+out = osp_plotMetabolitemapsOverlay(MRSCont,'TissCorrWaterScaled','mI',3,4,1,12,0,'T1w_rMRSIloc',0.8,1);
 set(gcf,'Renderer', 'painters');
 saveas(gcf,'Figure_3_mI_cbar.pdf','pdf');
 saveas(gcf,'Figure_3_mI_cbar.fig','fig');
@@ -336,41 +336,41 @@ saveas(gcf,'Figure_3_tCr_cbar_CRLBs.pdf','pdf');
 saveas(gcf,'Figure_3_tCr_cbar_CRLBs.fig','fig');
 close(gcf);
 
-out = osp_plotMetabolitemapsOverlay(MRSCont,'CRLBs','tCho',3,4,1,40,1,'T1w_rMRSIloc',0.8,0);
+out = osp_plotMetabolitemapsOverlay(MRSCont,'CRLBs','tCho',3,4,1,30,1,'T1w_rMRSIloc',0.8,0);
 set(gcf,'Renderer', 'painters');
 saveas(gcf,'Figure_3_tCho_CRLBs.pdf','pdf');
 saveas(gcf,'Figure_3_tCho_CRLBs.fig','fig');
 close(gcf);
-out = osp_plotMetabolitemapsOverlay(MRSCont,'CRLBs','tCho',3,4,1,40,1,'T1w_rMRSIloc',0.8,1);
+out = osp_plotMetabolitemapsOverlay(MRSCont,'CRLBs','tCho',3,4,1,30,1,'T1w_rMRSIloc',0.8,1);
 set(gcf,'Renderer', 'painters');
 saveas(gcf,'Figure_3_tCho_cbar_CRLBs.pdf','pdf');
 saveas(gcf,'Figure_3_tCho_cbar_CRLBs.fig','fig');
 close(gcf);
 
-out = osp_plotMetabolitemapsOverlay(MRSCont,'CRLBs','mI',3,4,1,40,1,'T1w_rMRSIloc',0.8,0);
+out = osp_plotMetabolitemapsOverlay(MRSCont,'CRLBs','mI',3,4,1,30,1,'T1w_rMRSIloc',0.8,0);
 set(gcf,'Renderer', 'painters');
 saveas(gcf,'Figure_3_mI_CRLBs.pdf','pdf');
 saveas(gcf,'Figure_3_mI_CRLBs.fig','fig');
 close(gcf);
-out = osp_plotMetabolitemapsOverlay(MRSCont,'CRLBs','mI',3,4,1,40,1,'T1w_rMRSIloc',0.8,1);
+out = osp_plotMetabolitemapsOverlay(MRSCont,'CRLBs','mI',3,4,1,30,1,'T1w_rMRSIloc',0.8,1);
 set(gcf,'Renderer', 'painters');
 saveas(gcf,'Figure_3_mI_cbar_CRLBs.pdf','pdf');
 saveas(gcf,'Figure_3_mI_cbar_CRLBs.fig','fig');
 close(gcf);
 
-out = osp_plotMetabolitemapsOverlay(MRSCont,'CRLBs','Glx',3,4,1,40,1,'T1w_rMRSIloc',0.8,0);
+out = osp_plotMetabolitemapsOverlay(MRSCont,'CRLBs','Glx',3,4,1,30,1,'T1w_rMRSIloc',0.8,0);
 set(gcf,'Renderer', 'painters');
 saveas(gcf,'Figure_3_Glx_CRLBs.pdf','pdf');
 saveas(gcf,'Figure_3_Glx_CRLBs.fig','fig');
 close(gcf);
-out = osp_plotMetabolitemapsOverlay(MRSCont,'CRLBs','Glx',3,4,1,40,1,'T1w_rMRSIloc',0.8,1);
+out = osp_plotMetabolitemapsOverlay(MRSCont,'CRLBs','Glx',3,4,1,30,1,'T1w_rMRSIloc',0.8,1);
 set(gcf,'Renderer', 'painters');
 saveas(gcf,'Figure_3_Glx_cbar_CRLBs.pdf','pdf');
 saveas(gcf,'Figure_3_Glx_cbar_CRLBs.fig','fig');
 close(gcf);
 
 % Atlas
-% Run the follwoing coment and pick thalamus at 25%
+% Run the follwoing coment and pick thalamus at 33%
 % out = osp_plotInteractiveAtlasAnalysis(MRSCont,1,'TissCorrWaterScaled',MRSCont.opts.MRSI.atlas.metabolites,'T1w_rMRSI')
 % set(gcf,'Renderer', 'painters');
 % saveas(gcf,'Figure_3_Atlas.pdf','pdf');
@@ -380,7 +380,7 @@ close(gcf);
 % short-TE MRSI dataset 30 ms
 
 load(which(fullfile('exampledata','mrsi','GE','TE_30','derivatives','jobMRSI_TE_30_P_NII.mat')));
-out = osp_plotSpecAndLocMRSI(MRSCont,[8,7,1;9,7,1;8,8,1;], 'T1w_rMRSI','OspreyFit','metab','Fit1DStack',0,2,2,0,1);
+out = osp_plotSpecAndLocMRSI(MRSCont,[10,7,1;11,7,1;10,9,1;], 'T1w_rMRSI','OspreyFit','metab','Fit1DStack',0,2,2,0,1);
 set(gcf, 'units','normalized','outerposition',[0 0 1 0.66]);
 set(gcf,'Renderer', 'painters');
 saveas(gcf,'SI_8_Fit_TE30.pdf','pdf');
@@ -389,7 +389,7 @@ close(gcf);
 
 % medium-TE MRSI dataset 70 ms
 load(which(fullfile('exampledata','mrsi','GE','TE_70','derivatives','jobMRSI_TE_70_P_NII.mat')));
-out = osp_plotSpecAndLocMRSI(MRSCont,[8,7,1;9,7,1;8,8,1;], 'T1w_rMRSI','OspreyFit','metab','Fit1DStack',0,2,2,0,1);
+out = osp_plotSpecAndLocMRSI(MRSCont,[10,7,1;11,7,1;10,9,1;], 'T1w_rMRSI','OspreyFit','metab','Fit1DStack',0,2,2,0,1);
 set(gcf, 'units','normalized','outerposition',[0 0 1 0.66]);
 set(gcf,'Renderer', 'painters');
 saveas(gcf,'SI_8_Fit_TE70.pdf','pdf');
