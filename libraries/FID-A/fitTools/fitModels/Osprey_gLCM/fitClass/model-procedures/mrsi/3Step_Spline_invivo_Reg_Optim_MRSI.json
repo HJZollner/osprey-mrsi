@@ -177,9 +177,9 @@
       "regularizer": {
         "parameter": "baseAmpl",
         "fun"      : "LambdaEDFormalism",
-        "m"        : 3,
-        "ub"       : 6,
-        "steps"    : 5,
+        "m"        : 15,
+        "ub"       : 14,
+        "steps"    : 20,
         "fixedParameter": ["ph0","ph1","GlobFreqShift","gaussLB","lorentzLB","freqShift"]
       }
     },
