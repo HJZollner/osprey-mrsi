@@ -45,9 +45,9 @@ required for full functionality:
 Osprey-MRSI uses [plotly](https://plotly.com/matlab/getting-started/) to generate interactive HTML reports (osprey-mrsi/mrsi/OspreyMRSIHTMLReport.m). The dependencies for this are automatically installed during the first function call. Please consult the above reference website for more information.
 
 #### FSLeyes
-If you want to use FSLeyes for interactive inspection of the MRSI analysis results, in addtion to the Osprey-native visualization, you will have to install FSLeyes (v0.1.17.0) as described [here](https://fsl.fmrib.ox.ac.uk/fsl/docs/utilities/fsleyes.html).
+If you want to use FSLeyes for interactive inspection of the MRSI analysis results, in addition to the Osprey-native visualization, you will have to install FSLeyes (v0.1.17.0) as described [here](https://fsl.fmrib.ox.ac.uk/fsl/docs/utilities/fsleyes.html).
 
-Make sure the fsleyes-plugin-mrs (v0.1.7) is correclty installed with your FSLeyes. Otherwise follow the instructions described [here](https://git.fmrib.ox.ac.uk/wclarke/fsleyes-plugin-mrs).
+Make sure the fsleyes-plugin-mrs (v0.1.7) is correctly installed with your FSLeyes. Otherwise, follow the instructions described [here](https://git.fmrib.ox.ac.uk/wclarke/fsleyes-plugin-mrs).
 
 For full feature support you will also have to add the viridis colourmap to FSLeyes. Find the location of FSLeyes, e.g., _…/FSLeyes/lib/python3.13/site-packages/fsleyes/assets/colourmaps_, copy the viridis color map file from _osprey-mrsi/mrsi/viridis.cmap_ into the colourmaps folder, and add ‘virdis Viridis’ to the order.txt file located in the same folder.
 
@@ -68,7 +68,7 @@ Make sure to remove Osprey, FID-A, and Gannet from your MATLAB path.
 
 ### Example data
 
-Visit the [Open Science Framework](https://osf.io/vkdpr/overview) for more information on how to run the example data.
+Visit the [Open Science Framework](https://osf.io/vkdpr/overview) to download all example datasets and learn more about running the example data.
 
 ## Contact, Feedback, Suggestions
 
@@ -97,6 +97,7 @@ We also wish to thank the following individuals for their contributions to the
 development of Osprey and shared processing code:
 
 - Georg Oeltzschner (Johns Hopkins University, Baltimore, MD)
+- Alexander R. Craven (Haukeland University, Bergen)
 - Jamie Near (McGill University, Montreal)
 - Ralph Noeske (GE Healthcare, Berlin)
 - Peter Barker (Johns Hopkins University, Baltimore, MD)
