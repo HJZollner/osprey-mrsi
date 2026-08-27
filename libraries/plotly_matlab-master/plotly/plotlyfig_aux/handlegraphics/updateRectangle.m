@@ -35,33 +35,31 @@ function obj = updateRectangle(obj, rectIndex)
     %-CHECK FOR MULTIPLE AXES-%
     [xsource, ysource] = findSourceAxis(obj,axIndex);
 
-    obj.data{rectIndex}.xaxis = "x" + xsource;
-    obj.data{rectIndex}.yaxis = "y" + ysource;
+    obj.data{rectIndex}.xaxis = sprintf("x%d", xsource);
+    obj.data{rectIndex}.yaxis = sprintf("y%d", ysource);
     obj.data{rectIndex}.type = 'scatter';
+tmpPosition = get(rect_data, 'Position');
 
-    obj.data{rectIndex}.x = [rect_data.Position(1) rect_data.Position(1) ...
-        rect_data.Position(1) + rect_data.Position(3) ...
-        rect_data.Position(1) + rect_data.Position(3) ...
-        rect_data.Position(1)];
+    obj.data{rectIndex}.x = [tmpPosition(1) tmpPosition(1) ...
+        tmpPosition(1) + tmpPosition(3) ...
+        tmpPosition(1) + tmpPosition(3) ...
+        tmpPosition(1)];
 
-    obj.data{rectIndex}.y = [rect_data.Position(2) ...
-        rect_data.Position(2) + rect_data.Position(4) ...
-        rect_data.Position(2) + rect_data.Position(4) ...
-        rect_data.Position(2) ...
-        rect_data.Position(2)];
+    obj.data{rectIndex}.y = [tmpPosition(2) ...
+        tmpPosition(2) + tmpPosition(4) ...
+        tmpPosition(2) + tmpPosition(4) ...
+        tmpPosition(2) ...
+        tmpPosition(2)];
 
-    obj.data{rectIndex}.name = rect_data.DisplayName;
+    if isprop(rect_data, 'DisplayName')
+        obj.data{rectIndex}.name = get(rect_data, 'DisplayName');
+    end
     obj.data{rectIndex}.mode = 'lines';
-    obj.data{rectIndex}.visible = strcmp(rect_data.Visible,'on');
+    obj.data{rectIndex}.visible = strcmp(get(rect_data, 'Visible'),'on');
     obj.data{rectIndex}.fill = 'tonexty';
     obj.data{rectIndex}.line = extractPatchLine(rect_data);
     fill = extractPatchFace(rect_data);
     obj.data{rectIndex}.fillcolor = fill.color;
 
-    switch rect_data.Annotation.LegendInformation.IconDisplayStyle
-        case "on"
-            obj.data{rectIndex}.showlegend = true;
-        case "off"
-            obj.data{rectIndex}.showlegend = false;
-    end
+    obj.data{rectIndex}.showlegend = getShowLegend(rect_data);
 end

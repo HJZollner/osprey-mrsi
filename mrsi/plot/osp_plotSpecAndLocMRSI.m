@@ -156,8 +156,8 @@ VoxelIndicesOverlay(:,1:2) = VoxelIndicesOverlay(:,1:2)-1;
 
 
 NumberOfSpecs = size(VoxelIndices,1); 
-
-out = figure;   
+ 
+out = figure('Visible','off');
 tiledlayout(1,NumberOfSpecs + 1,'TileSpacing','compact')
 nexttile
 imagesc(squeeze(Coreg_img_display(:,:,VoxelIndices(1,3))),[0 max_val])
@@ -288,6 +288,9 @@ if isfield(MRSCont, 'MRSIloc') && ~isempty(MRSCont.files_nii_MRSIloc{1})
         MRSCont.files_nii_MRSIloc{1} = strrep(MRSCont.files_nii_MRSIloc{1},'.nii','.nii.gz');
      end
 end
+
+drawnow limitrate nocallbacks;
+set(gcf,'Visible','on');
 end
 
    

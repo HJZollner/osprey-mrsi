@@ -6,9 +6,10 @@ function line = extractLineLine(line_data)
     %-INITIALIZE OUTPUT-%
     line = struct();
 
-    if line_data.LineStyle ~= "none"
-        line.color = getStringColor(round(255*line_data.Color));
-        line.width = line_data.LineWidth;
-        line.dash = getLineDash(line_data.LineStyle);
+    lineStyle = get(line_data, 'LineStyle');
+    if ischar(lineStyle) && ~strcmp(lineStyle, "none")
+        line.color = getStringColor(round(255*get(line_data, 'Color')));
+        line.width = get(line_data, 'LineWidth');
+        line.dash = getLineDash(lineStyle);
     end
 end

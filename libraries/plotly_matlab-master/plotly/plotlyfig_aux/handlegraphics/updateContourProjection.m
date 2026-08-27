@@ -11,14 +11,14 @@ function obj = updateContourProjection(obj,contourIndex)
     %-CHECK FOR MULTIPLE AXES-%
     [xsource, ysource] = findSourceAxis(obj,axIndex);
 
-    obj.data{contourIndex}.xaxis = "x" + xsource;
-    obj.data{contourIndex}.yaxis = "y" + ysource;
-    obj.data{contourIndex}.name = contour_data.DisplayName;
+    obj.data{contourIndex}.xaxis = sprintf("x%d", xsource);
+    obj.data{contourIndex}.yaxis = sprintf("y%d", ysource);
+    obj.data{contourIndex}.name = get(contour_data, 'DisplayName');
 
     %-setting the plot-%
-    xdata = contour_data.XData;
-    ydata = contour_data.YData;
-    zdata = contour_data.ZData;
+    xdata = get(contour_data, 'XData');
+    ydata = get(contour_data, 'YData');
+    zdata = get(contour_data, 'ZData');
 
     %-contour type-%
     obj.data{contourIndex}.type = 'surface';
@@ -31,9 +31,10 @@ function obj = updateContourProjection(obj,contourIndex)
     obj.data{contourIndex}.z = zdata;%-2*ones(size(zdata));
 
     %-setting for contour lines z-direction-%
-    obj.data{contourIndex}.contours.z.start = contour_data.LevelList(1);
-    obj.data{contourIndex}.contours.z.end = contour_data.LevelList(end);
-    obj.data{contourIndex}.contours.z.size = contour_data.LevelStep;
+    tmpLevelList = get(contour_data, 'LevelList');
+    obj.data{contourIndex}.contours.z.start = tmpLevelList(1);
+    obj.data{contourIndex}.contours.z.end = tmpLevelList(end);
+    obj.data{contourIndex}.contours.z.size = get(contour_data, 'LevelStep');
     obj.data{contourIndex}.contours.z.show = true;
     obj.data{contourIndex}.contours.z.usecolormap = true;
     obj.data{contourIndex}.hidesurface = true;
@@ -43,11 +44,11 @@ function obj = updateContourProjection(obj,contourIndex)
     obj.data{contourIndex}.contours.z.project.y = true;
     obj.data{contourIndex}.contours.z.project.z = true;
 
-    obj.data{contourIndex}.visible = strcmp(contour_data.Visible,'on');
+    obj.data{contourIndex}.visible = strcmp(get(contour_data, 'Visible'),'on');
     obj.data{contourIndex}.showscale = false;
 
     %-colorscale (ASSUMES PATCH CDATAMAP IS 'SCALED')-%
-    colormap = figure_data.Colormap;
+    colormap = get(figure_data, 'Colormap');
 
     for c = 1:size((colormap),1)
         col = round(255*(colormap(c,:)));
@@ -113,10 +114,5 @@ function obj = updateContourProjection(obj,contourIndex)
         obj.layout.scene.camera.eye.z = zar + zfac*zar;
     end
 
-    switch contour_data.Annotation.LegendInformation.IconDisplayStyle
-        case "on"
-            obj.data{contourIndex}.showlegend = true;
-        case "off"
-            obj.data{contourIndex}.showlegend = false;
-    end
+    obj.data{contourIndex}.showlegend = getShowLegend(contour_data);
 end

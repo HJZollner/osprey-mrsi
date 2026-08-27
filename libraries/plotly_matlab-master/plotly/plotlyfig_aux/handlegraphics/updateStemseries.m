@@ -3,20 +3,21 @@ function obj = updateStemseries(obj,dataIndex)
     stem_group = obj.State.Plot(dataIndex).Handle;
 
     %-get children-%
-    stem_child = stem_group.Children;
+    stem_child = get(stem_group, 'Children');
 
     %-update line-%
     obj.State.Plot(dataIndex).Handle = stem_child(1);
     stem_temp_data = updateLineseries(obj,dataIndex);
 
-    %-scatter mode-%
-    stem_temp_data.mode = 'lines+markers';
-
     %-update marker-%
+    stem_marker = stem_temp_data.marker;
     obj.State.Plot(dataIndex).Handle = stem_child(2);
     stem_temp_data = updateLineseries(obj,dataIndex);
 
-    stem_temp_data.marker = obj.data{dataIndex}.marker;
+    %-scatter mode-%
+    stem_temp_data.mode = 'lines+markers';
+
+    stem_temp_data.marker = stem_marker;
 
     %-hide every other marker-%
     color_temp = cell(1,length(stem_temp_data.x));
@@ -38,4 +39,21 @@ function obj = updateStemseries(obj,dataIndex)
     %-revert handle-%
     obj.State.Plot(dataIndex).Handle = stem_group;
     obj.data{dataIndex} = stem_temp_data;
+
+    %-baseline (y=0 line) for octave stem-%
+    %-stem3's baseline is a degenerate object with no data; converting
+    %-it would add an empty 2D trace that draws a second axes frame-%
+    if isprop(stem_group, 'baseline')
+        baseLine = get(stem_group, 'baseline');
+        if isempty(get(baseLine, 'XData'))
+            return
+        end
+        obj.PlotOptions.nPlots = obj.PlotOptions.nPlots + 1;
+        baseIndex = obj.PlotOptions.nPlots;
+        obj.State.Plot(dataIndex).Handle = baseLine;
+        baseData = updateLineseries(obj, dataIndex);
+        baseData.showlegend = false;
+        obj.data{baseIndex} = baseData;
+        obj.State.Plot(dataIndex).Handle = stem_group;
+    end
 end

@@ -199,9 +199,9 @@ for kk = 1:MRSCont.nDatasets
                 end
             end
 
-            % Pre-compute gap mask if needed
+            % Pre-compute and apply gap mask if needed
             if MRSCont.opts.MRSI.pseudo3D && ~isempty(MRSCont.coreg.gap_mask{kk})
-                gap_mask_logical = (gap_mask == 1);
+                index_mask(gap_mask==1) = 0;
             end
 
         end
@@ -279,15 +279,7 @@ for kk = 1:MRSCont.nDatasets
                         end
                         if MRSCont.opts.MRSI.outerMask.mask(x,y,rr)
                             index = x * 1e6 + y * 1e3 + rr;
-                            index_mask_temp =zeros(size(index_mask));
-                            index_mask_temp(index_mask==index) =1;
-                            
-                            % Apply gap mask if needed
-                            if MRSCont.opts.MRSI.pseudo3D  && ~isempty(MRSCont.coreg.gap_mask{kk})
-                                index_mask_temp = index_mask_temp & ~gap_mask_logical;
-                            end
-
-                            mask_indices_temp = find(index_mask_temp);
+                            mask_indices_temp = find(index_mask==index);
                           
                            if ~isempty(mask_indices_temp)
                                 % Extract values only at mask locations
@@ -370,7 +362,8 @@ for kk = 1:MRSCont.nDatasets
                             out.hdr.dim(1) = 3;
                             out.hdr.dim(2) = 1;
                             out.hdr.pixdim(5) = 1;
-                            out.hdr.pixdim(1) = 1; % For the other dataset this was -1 QForm changes  
+                            out.hdr.pixdim(1) = 1; % For the other dataset this was -1 QForm changes
+                            out.hdr.bitpix = 32;
                             out.img = squeeze(MRSCont.seg.tissue.fGM(kk,:,:,ll));
                             nii_tool('save', out, fullfile(saveDestination,['fGM_slice_' num2str(reorder(ll)) '.nii.gz']));  
                             out.img = squeeze(MRSCont.seg.tissue.fWM(kk,:,:,ll));
@@ -395,6 +388,7 @@ for kk = 1:MRSCont.nDatasets
                     out.hdr.dim(2) = 1;
                     out.hdr.pixdim(5) = 1;
                     out.hdr.pixdim(1) = 1; % For the other dataset this was -1 QForm changes  
+                    out.hdr.bitpix = 32;
                     out.img = squeeze(MRSCont.seg.tissue.fGM(kk,:,:,:));
                     nii_tool('save', out, fullfile(saveDestination,'fGM.nii.gz'));  
                     out.img = squeeze(MRSCont.seg.tissue.fWM(kk,:,:,:));

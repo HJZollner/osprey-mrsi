@@ -42,7 +42,7 @@ function obj = updateBoxplot(obj, boxIndex)
     box_data = obj.State.Plot(boxIndex).Handle;
 
     %-BOX CHILDREN-%
-    box_child = box_data.Children;
+    box_child = get(box_data, 'Children');
 
     %-CONFIRM PROPER BOXPLOT STRUCTURE-%
 
@@ -71,7 +71,7 @@ function obj = updateBoxplot(obj, boxIndex)
 
     ydata = [];
     obj.layout.bargroupgap = 1/bpnum;
-    obj.data{boxIndex}.name = box_data.DisplayName;
+    obj.data{boxIndex}.name = get(box_data, 'DisplayName');
 
     % iterate through box plot children in reverse order
     for bp = bpnum:-1:1
@@ -79,19 +79,14 @@ function obj = updateBoxplot(obj, boxIndex)
         [xsource, ysource] = findSourceAxis(obj,axIndex);
 
         %-AXIS DATA-%
-        xaxis = obj.layout.("xaxis" + xsource);
-        obj.data{boxIndex}.xaxis = "x" + xsource;
-        obj.data{boxIndex}.yaxis = "y" + ysource;
+        xaxis = obj.layout.(sprintf("xaxis%d", xsource));
+        obj.data{boxIndex}.xaxis = sprintf("x%d", xsource);
+        obj.data{boxIndex}.yaxis = sprintf("y%d", ysource);
         obj.data{boxIndex}.type = 'box';
-        obj.data{boxIndex}.visible = strcmp(box_data.Visible,'on');
+        obj.data{boxIndex}.visible = strcmp(get(box_data, 'Visible'),'on');
         obj.data{boxIndex}.fillcolor = 'rgba(0, 0, 0, 0)';
 
-        switch box_data.Annotation.LegendInformation.IconDisplayStyle
-            case "on"
-                obj.data{boxIndex}.showlegend = true;
-            case "off"
-                obj.data{boxIndex}.showlegend = false;
-        end
+        obj.data{boxIndex}.showlegend = getShowLegend(box_data);
 
         %-boxplot components-%
         Q1 = [];
@@ -107,42 +102,44 @@ function obj = updateBoxplot(obj, boxIndex)
             box_child_data = box_child(bp+bpnum*(bpc-1));
 
             %box name
-            if strcmp(box_child_data.Type,'text')
-                if iscell(box_child_data.String)
-                    boxname =  box_child_data.String{1};
+            if strcmp(get(box_child_data, 'Type'),'text')
+                if iscell(get(box_child_data, 'String'))
+                    boxString = get(box_child_data, 'String');
+                    boxname = boxString{1};
                 else
-                    boxname =  box_child_data.String;
+                    boxname = get(box_child_data, 'String');
                 end
             end
 
             % parse boxplot tags
-            switch box_child_data.Tag
+            switch get(box_child_data, 'Tag')
                 case 'Median'
-                    median =  box_child_data.YData(1);
+                    tmpYData = get(box_child_data, 'YData');
+                    median =  tmpYData(1);
                 case 'Upper Whisker'
-                    uwhisker = box_child_data.YData(2);
+                    uwhisker = tmpYData(2);
 
                     %-boxplot whisker width-%
                     obj.data{boxIndex}.whiskerwidth = 1;
                 case 'Lower Whisker'
-                    lwhisker = box_child_data.YData(1);
+                    lwhisker = tmpYData(1);
                 case 'Box'
-                    Q1 = min(box_child_data.YData);
-                    Q3 = max(box_child_data.YData);
+                    Q1 = min(get(box_child_data, 'YData'));
+                    Q3 = max(get(box_child_data, 'YData'));
 
                     %-boxplot line style-%
                     if isCompact
-                        col = round(255*box_child_data.Color);
+                        col = round(255*get(box_child_data, 'Color'));
                         obj.data{boxIndex}.fillcolor = getStringColor(col);
                     else
                         obj.data{boxIndex}.line = ...
                                 extractLineLine(box_child_data);
                     end
                 case 'Outliers'
-                    if ~isnan(box_child_data.YData)
+                    if ~isnan(get(box_child_data, 'YData'))
                         %-outlier marker data-%
 
-                        outliers = box_child_data.YData;
+                        outliers = get(box_child_data, 'YData');
                         %-outlier marker style-%
                         obj.data{boxIndex}.marker = ...
                                 extractLineMarker(box_child_data);
@@ -156,10 +153,10 @@ function obj = updateBoxplot(obj, boxIndex)
                     obj.data{boxIndex}.whiskerwidth = 0;
 
                     %-whisker data-%
-                    uwhisker = box_child_data.YData(2);
-                    lwhisker = box_child_data.YData(1);
+                    uwhisker = tmpYData(2);
+                    lwhisker = tmpYData(1);
                 case 'MedianInner'
-                    median = box_child_data.YData(1);
+                    median = tmpYData(1);
             end
         end
 
@@ -186,19 +183,19 @@ function obj = updateBoxplot(obj, boxIndex)
     text_child = findobj(obj.State.Plot(boxIndex).Handle, 'Type', 'text');
 
     %-STANDARDIZE UNITS-%
-    fontunits = text_child(1).FontUnits;
-    text_child(1).FontUnits = 'points';
+    fontunits = get(text_child(1), 'FontUnits');
+    set(text_child(1), 'FontUnits', 'points');
 
     text_data = text_child(1);
-    xaxis.tickfont.size = text_data.FontSize;
-    xaxis.tickfont.family = matlab2plotlyfont(text_data.FontName);
-    xaxis.tickfont.color = text_data.Color;
+    xaxis.tickfont.size = get(text_data, 'FontSize');
+    xaxis.tickfont.family = matlab2plotlyfont(get(text_data, 'FontName'));
+    xaxis.tickfont.color = get(text_data, 'Color');
     xaxis.type = 'category';
     xaxis.showticklabels = true;
     xaxis.autorange = true;
 
-    obj.layout.("xaxis" + xsource) = xaxis;
+    obj.layout.(sprintf("xaxis%d", xsource)) = xaxis;
 
     %-REVERT UNITS-%
-    text_child(1).FontUnits = fontunits;
+    set(text_child(1), 'FontUnits', fontunits);
 end

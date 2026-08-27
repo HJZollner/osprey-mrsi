@@ -267,7 +267,12 @@ osp_plot_quickmap_overlay(plotMap, voxel_mask, vertices_display, ...
 
 %% Setup colormap and colorbar
 colormap(custom_cmap);
-clim([0 max_val_cmap]);
+
+if exist('clim') % after R2022a
+    clim([0 max_val_cmap]);
+else
+    caxis([0 max_val_cmap])
+end
 
 if cbar
     cbar_map = colorbar;

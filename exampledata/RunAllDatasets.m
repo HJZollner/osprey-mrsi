@@ -22,6 +22,8 @@
 %   HISTORY:
 %       2025-03-06: First version of the code.
 
+assert(exist('OspreyMRSI')>0,'Please ensure that the osprey-mrsi folder (and subfolders) have been added to the MATLAB path')
+assert(strlen(which((fullfile('exampledata','mrsi','GE','TE_30_phantom_acr','jobMRSI_TE_30_in_vitro_P_NII_ax.m'))))>0, 'Please ensure that the example data has been extracted to the "exampledata/mrsi" subfolder')
 
 %% In Vitro datasets
 MRSCont = OspreyMRSI(which(fullfile('exampledata','mrsi','Philips','TE_15_braino_phantom','jobMRSI_TE_15_in_vitro_SPARSDAT.m')),'11',1);

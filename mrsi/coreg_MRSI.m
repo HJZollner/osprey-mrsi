@@ -46,7 +46,8 @@ function [vol_mask, T1_max, voxel_ctr,index_mask,gap_mask] = coreg_MRSI(in,vol_i
                     ToExport = osp_shift_nii_volume(ToExport,VoxelShift); % Update slice 
                 end
                 out.hdr = ToExport.nii_mrs.hdr;
-                [out] = updateNiiHDR(out);
+                [out] = updateNiiHDR(out,8);
+            
 
                 out.img = ones(size(squeeze(in.fids(1,:,:,ll))));
                 nii_tool('save', out, fullfile(outputFolder,['VoxelMask_slice_' num2str(reorder(ll)) '.nii.gz']));               
@@ -54,7 +55,7 @@ function [vol_mask, T1_max, voxel_ctr,index_mask,gap_mask] = coreg_MRSI(in,vol_i
         end
     else
         VoxelMask.hdr = in.nii_mrs.hdr;
-        [VoxelMask] = updateNiiHDR(VoxelMask);  
+        [VoxelMask] = updateNiiHDR(VoxelMask,8);  
         if in.dims.subSpecs == 0
             VoxelMask.img = ones(size(squeeze(in.fids(1,:,:,:,:))));
         else
@@ -79,7 +80,7 @@ function [vol_mask, T1_max, voxel_ctr,index_mask,gap_mask] = coreg_MRSI(in,vol_i
                     VoxelShift = [-in.nXvoxels/2 + nii_shifts(1) , -in.nYvoxels/2 + nii_shifts(2), (in.geometry.slice_distance/ToExport.geometry.size.cc)*shift + floor((in.geometry.size.cc-in.geometry.gap)/ToExport.geometry.size.cc/2) + 1];
                     ToExport = osp_shift_nii_volume(ToExport,VoxelShift); % Update slice               
                     out.hdr = ToExport.nii_mrs.hdr;
-                    [out] = updateNiiHDR(out);
+                    [out] = updateNiiHDR(out,8);
                     if ToExport.dims.subSpecs == 0
                         out.img = ones(size(squeeze(in.fids(1,ToExport.nXvoxels,ToExport.nYvoxels,ll))));
                     else
@@ -93,7 +94,7 @@ function [vol_mask, T1_max, voxel_ctr,index_mask,gap_mask] = coreg_MRSI(in,vol_i
                     VoxelShift = [-in.nXvoxels/2 + nii_shifts(1) , -in.nYvoxels/2 + nii_shifts(2), -1*((in.geometry.slice_distance/ToExport.geometry.size.cc)*shift + floor((in.geometry.size.cc-in.geometry.gap)/ToExport.geometry.size.cc/2) + 1)];
                     ToExport = osp_shift_nii_volume(ToExport,VoxelShift); % Update slice 
                     out.hdr = ToExport.nii_mrs.hdr;
-                    [out] = updateNiiHDR(out);
+                    [out] = updateNiiHDR(out,8);
     
                     if ToExport.dims.subSpecs == 0
                         out.img = ones(size(squeeze(in.fids(1,ToExport.nXvoxels,ToExport.nYvoxels,ll))));
@@ -195,7 +196,7 @@ function [vol_mask, T1_max, voxel_ctr,index_mask,gap_mask] = coreg_MRSI(in,vol_i
                     ToExport = osp_shift_nii_volume(ToExport,VoxelShift); % Update slice 
                 end
                 out.hdr = ToExport.nii_mrs.hdr;
-                [out] = updateNiiHDR(out);
+                [out] = updateNiiHDR(out,8);
 
                 out.img = squeeze(index_mask(:,:,ll));
                 nii_tool('save', out, fullfile(outputFolder,['IndexMask_slice_' num2str(reorder(ll)) '.nii.gz']));
@@ -287,7 +288,7 @@ spm_jobman('run',matlabbatch);
 
 end
 
-function [out] = updateNiiHDR(in)
+function [out] = updateNiiHDR(in,bit)
     out = in;
     out.hdr.dim(1) = 3;
     out.hdr.dim(2) = 1;
@@ -296,4 +297,5 @@ function [out] = updateNiiHDR(in)
     if out.hdr.dim(3) > 1
         out.hdr.dim(3) = 1;
     end
+    out.hdr.bitpix = bit;
 end

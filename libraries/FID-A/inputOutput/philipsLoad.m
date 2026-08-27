@@ -18,8 +18,12 @@
 
 function [data, header] = philipsLoad(filename)
 
-% Get the .spar filename
-sparname = [filename(1:(end-4)) 'spar'];
+% Get the .spar filename; match input case (for case-sensitive filesystems)
+if endsWith(filename, 'SDAT')
+    sparname = [filename(1:(end-4)) 'SPAR'];
+else
+    sparname = [filename(1:(end-4)) 'spar'];
+end
 
 % Populate the header information from the SPAR file
 % Look for regular expression separated by a colon

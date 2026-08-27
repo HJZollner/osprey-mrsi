@@ -52,7 +52,7 @@ classdef plotlyfig < handle
                 "AxisEqual", false, ...
                 "AspectRatio", [], ...
                 "CameraEye", [], ...
-                "is_headmap_axis", false, ...
+                "is_heatmap_axis", false, ...
                 "FrameDuration", 1, ... % in ms.
                 "FrameTransitionDuration", 0, ... % in ms.
                 "geoRenderType", 'geo', ...
@@ -98,7 +98,9 @@ classdef plotlyfig < handle
                 "MinCaptionMargin", 80, ...
                 "IsLight", false, ...
                 "isGeoaxis", false, ...
-                "isTernary", false ...
+                "isTernary", false, ...
+                "isPie", false, ...
+                "skipSurfaceHover", false ...
             );
 
             obj.State = struct( ...
@@ -135,10 +137,11 @@ classdef plotlyfig < handle
                 end
 
                 % plotly figure default style
-                fig_han.Name = obj.PlotOptions.FileName;
-                fig_han.Color = [1 1 1];
-                fig_han.NumberTitle = 'off';
-                fig_han.Visible = obj.PlotOptions.Visible;
+                set(fig_han, 'Name', obj.PlotOptions.FileName);
+                obj.State.Figure.OriginalColor = get(fig_han, 'Color');
+                set(fig_han, 'Color', [1 1 1]);
+                set(fig_han, 'NumberTitle', 'off');
+                set(fig_han, 'Visible', obj.PlotOptions.Visible);
 
                 % figure state
                 obj.State.Figure.Handle = fig_han;
@@ -151,8 +154,12 @@ classdef plotlyfig < handle
             if ~noFig
                 addlistener(obj.State.Figure.Handle,'Visible','PostSet',@(src,event)updateFigureVisible(obj,src,event));
                 addlistener(obj.State.Figure.Handle,'Name','PostSet',@(src,event)updateFigureName(obj,src,event));
-                addlistener(obj,'PlotOptions','PostSet',@(src,event)updatePlotOptions(obj,src,event));
-                addlistener(obj,'UserData','PostSet',@(src,event)updateUserData(obj,src,event));
+                if ~is_octave()
+                    % Octave does not support addlistener on classdef
+                    % handles, only on graphics objects.
+                    addlistener(obj,'PlotOptions','PostSet',@(src,event)updatePlotOptions(obj,src,event));
+                    addlistener(obj,'UserData','PostSet',@(src,event)updateUserData(obj,src,event));
+                end
             end
         end
 
@@ -188,7 +195,7 @@ classdef plotlyfig < handle
 
             % strip the style keys from data
             for d = 1:length(obj.data)
-                if contains(lower(obj.data{d}.type), ["scatter" "contour" "bar"])
+                if any(cellfun(@(p) ~isempty(strfind(lower(obj.data{d}.type), p)), {'scatter' 'contour' 'bar'}))
                     return
                 end
                 obj.data{d} = obj.stripkeys(obj.data{d}, obj.data{d}.type, 'style');
@@ -401,22 +408,33 @@ classdef plotlyfig < handle
 
             % check if there is tiledlayout
             try
-                tiledLayoutStruct = obj.State.Figure.Handle.Children;
-                isTiledLayout = strcmp(tiledLayoutStruct.Type, 'tiledlayout');
+                tiledLayoutStruct = get(obj.State.Figure.Handle, 'Children');
+                isTiledLayout = any(strcmp(get(tiledLayoutStruct, 'Type'), 'tiledlayout'));
             catch
                 isTiledLayout = false;
             end
 
             % find axes of figure
-            ax = findobj(obj.State.Figure.Handle, ...
-                {'Type','axes','-or','Type','PolarAxes'}, ...
-                '-and',{'Tag','','-or','Tag','PlotMatrixBigAx', ...
-                        '-or','Tag','PlotMatrixScatterAx', ...
-                        '-or','Tag','PlotMatrixHistAx'});
+            if is_octave()
+                ax = findobj(obj.State.Figure.Handle, ...
+                    'Type','axes','-or','Type','PolarAxes','-or','Type','heatmap', ...
+                    '-and','Tag','','-or','Tag','PlotMatrixBigAx', ...
+                    '-or','Tag','PlotMatrixScatterAx', ...
+                    '-or','Tag','PlotMatrixHistAx');
+            else
+                % Grouped in cell arrays to keep MATLAB's operator
+                % precedence: (Type in {axes,PolarAxes,heatmap}) AND
+                % (Tag in {'' or PlotMatrix*})
+                ax = findobj(obj.State.Figure.Handle, ...
+                    {'Type','axes','-or','Type','PolarAxes','-or','Type','heatmap'}, ...
+                    '-and',{'Tag','','-or','Tag','PlotMatrixBigAx', ...
+                    '-or','Tag','PlotMatrixScatterAx', ...
+                    '-or','Tag','PlotMatrixHistAx'});
+            end
 
             if isempty(ax)
                 try
-                    ax = obj.State.Figure.Handle.Children;
+                    ax = get(obj.State.Figure.Handle, 'Children');
                 catch
                     error("No axes found"); %#ok<CPROP>
                 end
@@ -428,15 +446,15 @@ classdef plotlyfig < handle
             for i = 1:length(ax)
                 for j = i:length(ax)
                     try
-                        if ((mean(eq(ax(i).Position, ax(j).Position)) == 1) && (i~=j) && strcmp(ax(i).Children.Type, 'histogram'))
-                            temp_plots = findobj(temp_ax(i),'-not','Type','Text','-not','Type','axes','-depth',1);
+                        if ((mean(eq(get(ax(i),'Position'), get(ax(j),'Position'))) == 1) && (i~=j) && strcmp(get(get(ax(i),'Children'), 'Type'), 'histogram'))
+                            temp_plots = findobj(temp_ax(i),'-depth',1,'-not','Type','Text','-not','Type','axes');
                             if isprop(temp_plots, 'FaceAlpha')
                                 update_opac(i) = true;
                             else
                                 update_opac(i) = false;
                             end
-                            temp_ax(i).YTick = temp_ax(j- deleted_idx).YTick;
-                            temp_ax(i).XTick = temp_ax(j- deleted_idx).XTick;
+                            set(temp_ax(i), 'YTick', get(temp_ax(j - deleted_idx), 'YTick'));
+                            set(temp_ax(i), 'XTick', get(temp_ax(j - deleted_idx), 'XTick'));
                             temp_ax(j - deleted_idx) = [];
                             deleted_idx = deleted_idx + 1;
                         end
@@ -447,6 +465,23 @@ classdef plotlyfig < handle
             end
             ax = temp_ax;
             %---------- checking the overlapping of the graphs ------------%
+
+            % drop invisible axes that carry no plots: plotmatrix adds a
+            % full-page invisible outer axes for its labels, and converting
+            % it would draw an empty white plot area over the whole grid
+            % (the polar axes is invisible too, but it carries the data)
+            keep = true(size(ax));
+            for a = 1:numel(ax)
+                try
+                    if strcmp(get(ax(a), 'Visible'), 'off') ...
+                            && isempty(findobj(ax(a), '-depth', 1, ...
+                                '-not', 'Type', 'Text', '-not', 'Type', 'axes'))
+                        keep(a) = false;
+                    end
+                catch
+                end
+            end
+            ax = ax(keep);
 
             obj.State.Figure.NumAxes = length(ax);
 
@@ -462,21 +497,21 @@ classdef plotlyfig < handle
 
                 % add title
                 try
-                    obj.State.Text(a).Handle = ax(axrev).Title;
-                    obj.State.Text(a).AssociatedAxis = handle(ax(axrev));
+                    obj.State.Text(a).Handle = get(ax(axrev), 'Title');
+                    obj.State.Text(a).AssociatedAxis = ax(axrev);
                     obj.State.Text(a).Title = true;
                     % Recommended use for subtitles is to append to the
                     % title https://github.com/plotly/plotly.js/issues/233
                     if isprop(ax(axrev),"Subtitle")
-                        sub_handle = ax(axrev).Subtitle;
-                        if ~isempty(sub_handle.String)
-                            titleObj = ax(axrev).Title;
-                            origTitle = titleObj.String;
+                        sub_handle = get(ax(axrev), 'Subtitle');
+                        if ~isempty(get(sub_handle, 'String'))
+                            titleObj = get(ax(axrev), 'Title');
+                            origTitle = get(titleObj, 'String');
                             oncleanup = onCleanup( ...
                                     @() set(titleObj,'String',origTitle));
-                            obj.State.Text(a).Handle.String = [string( ...
-                                    obj.State.Text(a).Handle.String) ...
-                                    "<sub>"+sub_handle.String+"</sub>"];
+                            set(obj.State.Text(a).Handle, 'String', ...
+                                    {char(get(obj.State.Text(a).Handle, 'String')) ...
+                                    ['<sub>' char(get(sub_handle, 'String')) '</sub>']});
                         end
                     end
                 catch
@@ -484,13 +519,29 @@ classdef plotlyfig < handle
                 end
 
                 % find plots of figure
-                plots = findobj(ax(axrev),'-not','Type','Text','-not','Type','axes','-depth',1);
+                try
+                    axTag = get(ax(axrev), 'Tag');
+                catch
+                    axTag = '';
+                end
+                if ischar(axTag) && strcmp(axTag, 'legend')
+                    % Octave legends are axes objects tagged "legend";
+                    % their children are legend graphics, not plots
+                    continue
+                end
+                plots = findobj(ax(axrev),'-depth',1,'-not','Type','Text','-not','Type','axes');
+
+                % include GraphPlot objects (HandleVisibility='off' by default)
+                graphPlots = findall(ax(axrev), 'Type', 'graphplot', '-depth', 1);
+                if ~isempty(graphPlots)
+                    plots = [plots; graphPlots(~ismember(graphPlots, plots))];
+                end
 
                 % get number of nbars for pie3
-                if lower(obj.PlotOptions.TreatAs) == "pie3"
+                if ismember("pie3", lower(obj.PlotOptions.TreatAs))
                     obj.PlotOptions.nbars{a} = 0;
                     for i = 1:length(plots)
-                        if lower(obj.PlotOptions.TreatAs) == "surface"
+                        if ismember("surface", lower(obj.PlotOptions.TreatAs))
                             obj.PlotOptions.nbars{a} = obj.PlotOptions.nbars{a} + 1;
                         end
                     end
@@ -498,7 +549,7 @@ classdef plotlyfig < handle
 
                 % check if current axes have multiple y-axes
                 try
-                    obj.PlotlyDefaults.isMultipleYAxes(axrev) = length(ax(axrev).YAxis) == 2;
+                    obj.PlotlyDefaults.isMultipleYAxes(axrev) = length(get(ax(axrev), 'YAxis')) == 2;
                 catch
                     obj.PlotlyDefaults.isMultipleYAxes(axrev) = false;
                 end
@@ -509,13 +560,14 @@ classdef plotlyfig < handle
                     nprev = length(plots) - np + 1;
 
                     % update the plot fields
-                    plotClass = lower(getGraphClass(plots(nprev)));
+                    graphClass = getGraphClass(plots(nprev));
+                    plotClass = lower(graphClass);
 
                     if ~ismember(plotClass, {'light', 'polaraxes'})
                         obj.State.Figure.NumPlots = obj.State.Figure.NumPlots + 1;
-                        obj.State.Plot(obj.State.Figure.NumPlots).Handle = handle(plots(nprev));
-                        obj.State.Plot(obj.State.Figure.NumPlots).AssociatedAxis = handle(ax(axrev));
-                        obj.State.Plot(obj.State.Figure.NumPlots).Class = getGraphClass(plots(nprev));
+                        obj.State.Plot(obj.State.Figure.NumPlots).Handle = plots(nprev);
+                        obj.State.Plot(obj.State.Figure.NumPlots).AssociatedAxis = ax(axrev);
+                        obj.State.Plot(obj.State.Figure.NumPlots).Class = graphClass;
                     else
                         obj.PlotlyDefaults.IsLight = true;
                     end
@@ -533,11 +585,11 @@ classdef plotlyfig < handle
                     end
 
                     if isPareto
-                        obj.State.Plot(obj.State.Figure.NumPlots).AssociatedAxis = handle(ax(axrev));
+                        obj.State.Plot(obj.State.Figure.NumPlots).AssociatedAxis = ax(axrev);
                     else
                         obj.State.Figure.NumPlots = obj.State.Figure.NumPlots + 1;
                         obj.State.Plot(obj.State.Figure.NumPlots).Handle = {};
-                        obj.State.Plot(obj.State.Figure.NumPlots).AssociatedAxis = handle(ax(axrev));
+                        obj.State.Plot(obj.State.Figure.NumPlots).AssociatedAxis = ax(axrev);
                         obj.State.Plot(obj.State.Figure.NumPlots).Class = 'nothing';
                     end
                 end
@@ -546,9 +598,9 @@ classdef plotlyfig < handle
                 texts = findobj(ax(axrev),'Type','text','-depth',1);
 
                 for t = 1:length(texts)
-                    obj.State.Text(obj.State.Figure.NumTexts + t).Handle = handle(texts(t));
+                    obj.State.Text(obj.State.Figure.NumTexts + t).Handle = texts(t);
                     obj.State.Text(obj.State.Figure.NumTexts + t).Title = false;
-                    obj.State.Text(obj.State.Figure.NumTexts + t).AssociatedAxis = handle(ax(axrev));
+                    obj.State.Text(obj.State.Figure.NumTexts + t).AssociatedAxis = ax(axrev);
                 end
 
                 % update number of annotations
@@ -556,39 +608,41 @@ classdef plotlyfig < handle
             end
 
             % find legends of figure
-            if isHG2
-                legs = findobj(obj.State.Figure.Handle,'Type','Legend');
-            else
+            if is_octave()
+                % In Octave, legends are axes objects with a "legend" tag
                 legs = findobj(obj.State.Figure.Handle,'Type','axes','-and','Tag','legend');
+            else
+                legs = findobj(obj.State.Figure.Handle,'Type','Legend');
             end
 
             obj.State.Figure.NumLegends = length(legs);
 
             for g = 1:length(legs)
-                obj.State.Legend(g).Handle = handle(legs(g));
+                obj.State.Legend(g).Handle = legs(g);
 
                 % find associated axis
-                legendAxis = findLegendAxis(obj, handle(legs(g)));
+                legendAxis = findLegendAxis(obj, legs(g));
 
                 % update colorbar associated axis
                 obj.State.Legend(g).AssociatedAxis = legendAxis;
             end
 
             % find colorbar of figure
-            if isHG2
-                cols = findobj(obj.State.Figure.Handle,'Type','Colorbar');
+            if is_octave()
+                % In Octave, colorbars are axes objects with a "colorbar" tag
+                cols = findobj(obj.State.Figure.Handle,'Type','axes','-and','Tag','colorbar');
             else
-                cols = findobj(obj.State.Figure.Handle,'Type','axes','-and','Tag','Colorbar');
+                cols = findobj(obj.State.Figure.Handle,'Type','Colorbar');
             end
 
             obj.State.Figure.NumColorbars = length(cols);
 
             for c = 1:length(cols)
                 % update colorbar handle
-                obj.State.Colorbar(c).Handle = handle(cols(c));
+                obj.State.Colorbar(c).Handle = cols(c);
 
                 % find associated axis
-                colorbarAxis = findColorbarAxis(obj, handle(cols(c)));
+                colorbarAxis = findColorbarAxis(obj, cols(c));
 
                 % update colorbar associated axis
                 obj.State.Colorbar(c).AssociatedAxis = colorbarAxis;
@@ -596,7 +650,19 @@ classdef plotlyfig < handle
 
             %--------------------UPDATE PLOTLY FIGURE---------------------%
 
+            % Normalize axis units once for the entire update cycle.
+            axisUnitsOrig = cell(1, obj.State.Figure.NumAxes);
+            for a = 1:obj.State.Figure.NumAxes
+                if isprop(obj.State.Axis(a).Handle, 'Units')
+                    axisUnitsOrig{a} = get(obj.State.Axis(a).Handle, 'Units');
+                    set(obj.State.Axis(a).Handle, 'Units', 'normalized');
+                end
+            end
+            restoreUnits = onCleanup(@() restoreAxisUnits( ...
+                obj.State.Axis, axisUnitsOrig, obj.State.Figure.NumAxes));
+
             obj.data = {};
+            obj.PlotlyDefaults.patchEdges = {};
             obj.PlotOptions.nPlots = obj.State.Figure.NumPlots;
             obj.PlotlyDefaults.anIndex = obj.State.Figure.NumTexts;
 
@@ -608,7 +674,7 @@ classdef plotlyfig < handle
             % update axes
             for n = 1:obj.State.Figure.NumAxes
                 nrev = length(ax) - n + 1;
-                if ismember(ax(nrev).Type,specialAxisPlots())
+                if ismember(get(ax(nrev), 'Type'), specialAxisPlots())
                     continue
                 end
                 if ~obj.PlotlyDefaults.isMultipleYAxes(n)
@@ -625,20 +691,45 @@ classdef plotlyfig < handle
                 updateData(obj,n);
             end
 
+            % append the patch edge traces collected by updatePatch
+            if ~isempty(obj.PlotlyDefaults.patchEdges)
+                obj.data = [obj.data, obj.PlotlyDefaults.patchEdges];
+            end
+
             % update annotations
             for n = 1:obj.State.Figure.NumTexts
                 try
-                    if obj.PlotOptions.is_headmap_axis
-                        updateHeatmapAnnotation(obj,n);
+                    if obj.PlotOptions.is_heatmap_axis
+                        if ~isempty(obj.State.Text(n).Handle)
+                            nanns = length(obj.layout.annotations);
+                            axIndex = nanns + obj.getAxisIndex(obj.State.Text(n).AssociatedAxis);
+                            obj.layout.annotations{axIndex} = getHeatmapTitleAnnotation(obj,n);
+                        end
                         obj.PlotOptions.CleanFeedTitle = false;
                     elseif obj.PlotlyDefaults.isGeoaxis
                         % TODO
                     else
                         if ~obj.PlotlyDefaults.isTernary
-                            obj.layout.annotations{end+1} = updateAnnotation(obj,n);
+                            % the 2D pie's own textinfo draws the slice
+                            % labels; its text objects become annotations
+                            % only when it is a title
+                            if ~obj.PlotlyDefaults.isPie || obj.State.Text(n).Title
+                                axHandle = obj.State.Text(n).AssociatedAxis;
+                                if ~obj.State.Text(n).Title ...
+                                        && isprop(axHandle, 'View') ...
+                                        && ~isequal(get(axHandle, 'View'), [0 90]) ...
+                                        && ~isempty(get(obj.State.Text(n).Handle, 'String'))
+                                    % texts on 3D axes (pie3 labels) live
+                                    % in the scene so they rotate with
+                                    % the view
+                                    updateSceneText(obj, n);
+                                else
+                                    obj.layout.annotations{end+1} = updateAnnotation(obj,n);
 
-                            if obj.State.Figure.NumAxes == 1
-                                obj.PlotOptions.CleanFeedTitle = false;
+                                    if obj.State.Figure.NumAxes == 1
+                                        obj.PlotOptions.CleanFeedTitle = false;
+                                    end
+                                end
                             end
                         end
                     end
@@ -653,7 +744,7 @@ classdef plotlyfig < handle
 
             if obj.State.Figure.NumLegends < 2
                 for n = 1:obj.State.Figure.NumLegends
-                    if lower(obj.PlotOptions.TreatAs) ~= "pie3"
+                    if ~strcmpi(obj.PlotOptions.TreatAs, "pie3")
                         updateLegend(obj,n);
                     end
                 end
@@ -688,11 +779,11 @@ classdef plotlyfig < handle
 
         %----UPDATE FIGURE OPTIONS----%
         function obj = updateFigureVisible(obj,src,event)
-            obj.PlotOptions.Visible = obj.State.Figure.Handle.Visible;
+            obj.PlotOptions.Visible = get(obj.State.Figure.Handle, 'Visible');
         end
 
         function obj = updateFigureName(obj,src,event)
-            obj.PlotOptions.FileName = obj.State.Figure.Handle.Name;
+            obj.PlotOptions.FileName = get(obj.State.Figure.Handle, 'Name');
         end
 
         %----UPDATE PLOT OPTIONS----%
@@ -1047,6 +1138,14 @@ classdef plotlyfig < handle
                         end
                     end
             end
+        end
+    end
+end
+
+function restoreAxisUnits(stateAxis, origUnits, numAxes)
+    for a = 1:numAxes
+        if ~isempty(origUnits{a})
+            set(stateAxis(a).Handle, 'Units', origUnits{a});
         end
     end
 end
