@@ -66,9 +66,9 @@ extract and add to your MATLAB path. If you run an Apple Silicon processor
 
 Make sure to remove Osprey, FID-A, and Gannet from your MATLAB path.
 
-### Example data
+### Workflow Demonstration 
 
-Visit the [Open Science Framework](https://osf.io/vkdpr/overview) to download all example datasets and learn more about running the example data.
+Visit the [Open Science Framework](https://osf.io/vkdpr/overview) to download all example datasets and run the workflow demonstration described in the Osprey-MRSI manuscript.
 
 ## Contact, Feedback, Suggestions
 
