@@ -1,10 +1,11 @@
 % This script automatically the raw figures of the analysis of the Osprey MRSI example
 % data which is presented in the manuscript 'Fully automated open-source
-% analysis of magnetic resonance spectroscopic imaging (MRSI) data in Osprey'
+% analysis and interactive visualization of magnetic resonance spectroscopic imaging (MRSI) data in Osprey-MRSI'
 % by Zollner et al. 2026.
 % 
 %   PREREQUISITS:
-%   You have to run the RunAllDatasets.m script from the OSF first.
+%   Osprey MRSI Matlab path (https://github.com/HJZollner/osprey-mrsi)
+%   You have to run the RunAllDatasets.m script located in the 'osprey-mrsi/exampledata' folder first.
 %
 %   AUTHOR:
 %       Dr. Helge Zollner (Johns Hopkins University, 2025-03-06)
@@ -12,7 +13,10 @@
 %
 %
 %   HISTORY:
-%       2025-03-25: First version of the code.
+%       2026-03-25: First version of the code.
+
+assert(exist('OspreyMRSI')>0,'Please ensure that the osprey-mrsi folder (and subfolders) have been added to the MATLAB path')
+assert(strlength(which((fullfile('exampledata','mrsi','Philips','TE_15_braino_phantom','derivatives','jobMRSI_TE_30_in_vitro_P_NII_ax.mat'))))>0, 'Please run the "osprey-mrsi/exampledata/RunAllDatasets.m" script before proceeding with the plots.')
 %% In Vitro Scan Philips
 load(which(fullfile('exampledata','mrsi','Philips','TE_15_braino_phantom','derivatives','jobMRSI_TE_15_in_vitro_SPARSDAT.mat')));
 
