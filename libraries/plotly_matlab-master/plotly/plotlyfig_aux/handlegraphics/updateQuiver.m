@@ -7,30 +7,57 @@ function obj = updateQuiver(obj, dataIndex)
     xSource = findSourceAxis(obj,axIndex);
 
     %-get trace data-%
-    xData = plotData.XData;
-    yData = plotData.YData;
-    zData = plotData.ZData;
+    xData = get(plotData, 'XData');
+    yData = get(plotData, 'YData');
+    zData = get(plotData, 'ZData');
+    uDataRaw = get(plotData, 'UData');
+    vDataRaw = get(plotData, 'VData');
+    wDataRaw = get(plotData, 'WData');
 
-    if isvector(xData)
-        [xData, yData] = meshgrid(xData, yData);
+    %-one arrow per element: vector inputs pair up x/y/u/v directly,
+    %-matrix inputs are full grids of matching shape.  MATLAB's
+    %-no-coords quiver (quiver(u,v)) stores scalar defaults (YData = 1)
+    %-that the primitive broadcasts internally - replicate that here.-%
+    if isvector(xData) && isvector(uDataRaw)
+        nArrows = numel(uDataRaw);
+        if numel(xData) == 1
+            xData = xData * ones(size(uDataRaw));
+        end
+        if numel(yData) == 1
+            yData = yData * ones(size(uDataRaw));
+        end
+        if numel(zData) == 1
+            zData = zData * ones(size(uDataRaw));
+        end
+    else
+        if isvector(xData)
+            [xData, yData] = meshgrid(xData, yData);
+        end
+        nArrows = numel(uDataRaw);
     end
 
-    if strcmpi(plotData.AutoScale, 'on')
-        scaleFactor = getScaleFactor(xData, plotData.UData, 45);
+    if strcmpi(get(plotData, 'AutoScale'), 'on')
+        scaleFactor = getScaleFactor(xData, uDataRaw, 45);
     else
         scaleFactor = 1;
     end
 
-    uData = plotData.UData * scaleFactor;
-    vData = plotData.VData * scaleFactor;
-    wData = plotData.WData * scaleFactor;
+    uData = uDataRaw * scaleFactor;
+    vData = vDataRaw * scaleFactor;
+    wData = wDataRaw * scaleFactor;
 
     %-check if is 3D quiver-%
     isQuiver3D = ~isempty(zData);
 
     %-update axis-%
     if isQuiver3D
-        updateScene(obj, dataIndex);
+        updateScene(obj, dataIndex, ...
+            "useQuiverCamera", true, "setTitleFont", false, ...
+            "handleDatetimeTicks", false);
+        scn = sprintf('scene%d', xSource);
+        obj.layout.(scn).xaxis.showspikes = false;
+        obj.layout.(scn).yaxis.showspikes = false;
+        obj.layout.(scn).zaxis.showspikes = false;
     end
 
     %-set trace-%
@@ -44,20 +71,24 @@ function obj = updateQuiver(obj, dataIndex)
     end
 
     obj.data{dataIndex}.mode = 'lines';
-    obj.data{dataIndex}.visible = strcmp(plotData.Visible,'on');
-    obj.data{dataIndex}.name = plotData.DisplayName;
+    obj.data{dataIndex}.visible = strcmp(get(plotData, 'Visible'),'on');
+    obj.data{dataIndex}.name = get(plotData, 'DisplayName');
 
     %-quiver line color-%
-    lineColor = round(255*plotData.Color);
+    lineColor = round(255*get(plotData, 'Color'));
     obj.data{dataIndex}.line.color = getStringColor(lineColor);
 
     %-quiver line width-%
-    obj.data{dataIndex}.line.width = 2.5 * plotData.LineWidth;
+    obj.data{dataIndex}.line.width = 2.5 * get(plotData, 'LineWidth');
 
     %-set trace data for quiver line only-%
     m = 1;
+    tailX = [];
+    tailY = [];
+    tailZ = [];
+    tailHt = {};
 
-    for n = 1:numel(xData)
+    for n = 1:nArrows
         obj.data{dataIndex}.x(m) = xData(n);
         obj.data{dataIndex}.x(m+1) = xData(n) + uData(n);
         obj.data{dataIndex}.x(m+2) = nan;
@@ -66,19 +97,60 @@ function obj = updateQuiver(obj, dataIndex)
         obj.data{dataIndex}.y(m+1) = yData(n) + vData(n);
         obj.data{dataIndex}.y(m+2) = nan;
 
+        tailX(end+1) = xData(n);
+        tailY(end+1) = yData(n);
+
         if isQuiver3D
             obj.data{dataIndex}.z(m) = zData(n);
             obj.data{dataIndex}.z(m+1) = zData(n) + wData(n);
             obj.data{dataIndex}.z(m+2) = nan;
+            tailZ(end+1) = zData(n);
+            label = sprintf("(%.2f, %.2f, %.2f)<br>(%.2f, %.2f, %.2f)", ...
+                xData(n), yData(n), zData(n), uData(n), vData(n), wData(n));
+        else
+            label = sprintf("(%.2f, %.2f)<br>(%.2f, %.2f)", ...
+                xData(n), yData(n), uData(n), vData(n));
         end
+        tailHt{end+1} = label;
         m = m + 3;
     end
 
+    obj.data{dataIndex}.hoverinfo = 'skip';
+
+    obj.PlotOptions.nPlots = obj.PlotOptions.nPlots + 1;
+    tailIndex = obj.PlotOptions.nPlots;
+
+    if isQuiver3D
+        obj.data{tailIndex}.type = 'scatter3d';
+        obj.data{tailIndex}.scene = sprintf('scene%d', xSource);
+    else
+        obj.data{tailIndex}.type = 'scatter';
+        obj.data{tailIndex}.xaxis = sprintf('x%d', xSource);
+        obj.data{tailIndex}.yaxis = sprintf('y%d', xSource);
+    end
+
+    obj.data{tailIndex}.mode = 'markers';
+    obj.data{tailIndex}.visible = strcmp(get(plotData, 'Visible'),'on');
+    obj.data{tailIndex}.x = tailX;
+    obj.data{tailIndex}.y = tailY;
+    if isQuiver3D
+        obj.data{tailIndex}.z = tailZ;
+    end
+    obj.data{tailIndex}.hovertext = tailHt;
+    obj.data{tailIndex}.hoverinfo = 'text';
+    obj.data{tailIndex}.marker.color = 'rgba(0,0,0,0)';
+    obj.data{tailIndex}.marker.size = 6;
+    obj.data{tailIndex}.showlegend = false;
+
     %-set trace data for quiver barb-%
-    if isHG2() && strcmp(plotData.ShowArrowHead, 'on')
-        maxHeadSize = plotData.MaxHeadSize * 1.5;
+    if strcmp(get(plotData, 'ShowArrowHead'), 'on')
+        maxHeadSize = get(plotData, 'MaxHeadSize') * 1.5;
         headWidth = 20;
-        for n = 1:numel(xData)
+
+        barbX = [];
+        barbY = [];
+        barbZ = [];
+        for n = 1:nArrows
             if isQuiver3D
                 quiverBarb = getQuiverBarb3D(...
                     xData(n), yData(n), zData(n), ...
@@ -92,131 +164,41 @@ function obj = updateQuiver(obj, dataIndex)
                     maxHeadSize, headWidth ...
                 );
             end
-            for m = 1:size(quiverBarb, 2)
-                obj.data{dataIndex}.x(end+1) = quiverBarb(1, m);
-                obj.data{dataIndex}.y(end+1) = quiverBarb(2, m);
-                if isQuiver3D
-                    obj.data{dataIndex}.z(end+1) = quiverBarb(3, m);
-                end
+            barbX = [barbX, quiverBarb(1, :)];
+            barbY = [barbY, quiverBarb(2, :)];
+            if isQuiver3D
+                barbZ = [barbZ, quiverBarb(3, :)];
             end
+        end
+
+        obj.PlotOptions.nPlots = obj.PlotOptions.nPlots + 1;
+        barbIndex = obj.PlotOptions.nPlots;
+
+        if isQuiver3D
+            obj.data{barbIndex}.type = 'scatter3d';
+            obj.data{barbIndex}.scene = sprintf('scene%d', xSource);
+        else
+            obj.data{barbIndex}.type = 'scatter';
+            obj.data{barbIndex}.xaxis = sprintf('x%d', xSource);
+            obj.data{barbIndex}.yaxis = sprintf('y%d', xSource);
+        end
+
+        obj.data{barbIndex}.mode = 'lines';
+        obj.data{barbIndex}.visible = strcmp(get(plotData, 'Visible'),'on');
+        obj.data{barbIndex}.line.color = obj.data{dataIndex}.line.color;
+        obj.data{barbIndex}.line.width = obj.data{dataIndex}.line.width;
+        obj.data{barbIndex}.hoverinfo = 'skip';
+        obj.data{barbIndex}.showlegend = false;
+
+        obj.data{barbIndex}.x = barbX;
+        obj.data{barbIndex}.y = barbY;
+        if isQuiver3D
+            obj.data{barbIndex}.z = barbZ;
         end
     end
 
     %-set trace legend-%
-    switch plotData.Annotation.LegendInformation.IconDisplayStyle
-        case "on"
-            obj.data{dataIndex}.showlegend = true;
-        case "off"
-            obj.data{dataIndex}.showlegend = false;
-    end
-end
-
-function updateScene(obj, dataIndex)
-    %-INITIALIZATIONS-%
-    axIndex = obj.getAxisIndex(obj.State.Plot(dataIndex).AssociatedAxis);
-    plotData = obj.State.Plot(dataIndex).Handle;
-    axisData = plotData.Parent;
-    xSource = findSourceAxis(obj, axIndex);
-    scene = obj.layout.("scene" + xSource);
-
-    aspectRatio = axisData.PlotBoxAspectRatio;
-    cameraPosition = axisData.CameraPosition;
-    dataAspectRatio = axisData.DataAspectRatio;
-    cameraUpVector = axisData.CameraUpVector;
-    cameraEye = cameraPosition./dataAspectRatio;
-    normFac = abs(min(cameraEye));
-
-    if isprop(axisData, "Layout") && isprop(axisData.Layout, "TileSpan")
-        fac = size(axisData.Layout.TileSpan, 2);
-    else
-        fac = 1;
-    end
-
-    r1 = rangeLength([ 1, prod(aspectRatio([1,2])) ]);
-    r2 = rangeLength([ 1, prod(aspectRatio([1,3])) ]);
-    r3 = rangeLength([ 1, prod(aspectRatio([2,3])) ]);
-    r = max([r1, r2, r3]);
-
-    %-aspect ratio-%
-    scene.aspectratio.x = 1.0*aspectRatio(1);
-    scene.aspectratio.y = 1.0*aspectRatio(2);
-    scene.aspectratio.z = 1.0*aspectRatio(3);
-
-    %-camera eye-%
-    scene.camera.eye.x = cameraEye(1) / normFac * (1.4 + r * fac);
-    scene.camera.eye.y = cameraEye(2) / normFac * (1.4 + r * fac);
-    scene.camera.eye.z = cameraEye(3) / normFac * (1.4 + r * fac);
-
-    %-camera up-%
-    scene.camera.up.x = cameraUpVector(1);
-    scene.camera.up.y = cameraUpVector(2);
-    scene.camera.up.z = cameraUpVector(3);
-
-    %-camera projection-%
-    % scene.camera.projection.type = axisData.Projection;
-
-    %-scene axis configuration-%
-    rangeFac = 0.0;
-
-    xRange = rangeLength(axisData.XLim);
-    scene.xaxis.range(1) = axisData.XLim(1) - rangeFac * xRange;
-    scene.xaxis.range(2) = axisData.XLim(2) + rangeFac * xRange;
-
-    yRange = rangeLength(axisData.YLim);
-    scene.yaxis.range(1) = axisData.YLim(1) - rangeFac * yRange;
-    scene.yaxis.range(2) = axisData.YLim(2) + rangeFac * yRange;
-
-    zRange = rangeLength(axisData.ZLim);
-    scene.zaxis.range(1) = axisData.ZLim(1) - rangeFac * zRange;
-    scene.zaxis.range(2) = axisData.ZLim(2) + rangeFac * zRange;
-
-    scene.xaxis.zeroline = false;
-    scene.yaxis.zeroline = false;
-    scene.zaxis.zeroline = false;
-
-    scene.xaxis.showline = true;
-    scene.yaxis.showline = true;
-    scene.zaxis.showline = true;
-
-    scene.xaxis.ticklabelposition = 'outside';
-    scene.yaxis.ticklabelposition = 'outside';
-    scene.zaxis.ticklabelposition = 'outside';
-
-    scene.xaxis.title = axisData.XLabel.String;
-    scene.yaxis.title = axisData.YLabel.String;
-    scene.zaxis.title = axisData.ZLabel.String;
-
-    %-tick labels-%
-    scene.xaxis.tickvals = axisData.XTick;
-    scene.xaxis.ticktext = axisData.XTickLabel;
-    scene.yaxis.tickvals = axisData.YTick;
-    scene.yaxis.ticktext = axisData.YTickLabel;
-    scene.zaxis.tickvals = axisData.ZTick;
-    scene.zaxis.ticktext = axisData.ZTickLabel;
-
-    scene.xaxis.tickcolor = 'rgba(0,0,0,1)';
-    scene.yaxis.tickcolor = 'rgba(0,0,0,1)';
-    scene.zaxis.tickcolor = 'rgba(0,0,0,1)';
-    scene.xaxis.tickfont.size = axisData.FontSize;
-    scene.yaxis.tickfont.size = axisData.FontSize;
-    scene.zaxis.tickfont.size = axisData.FontSize;
-    scene.xaxis.tickfont.family = matlab2plotlyfont(axisData.FontName);
-    scene.yaxis.tickfont.family = matlab2plotlyfont(axisData.FontName);
-    scene.zaxis.tickfont.family = matlab2plotlyfont(axisData.FontName);
-
-    %-grid-%
-    if strcmp(axisData.XGrid, 'off')
-        scene.xaxis.showgrid = false;
-    end
-    if strcmp(axisData.YGrid, 'off')
-        scene.yaxis.showgrid = false;
-    end
-    if strcmp(axisData.ZGrid, 'off')
-        scene.zaxis.showgrid = false;
-    end
-
-    %-SET SCENE TO LAYOUT-%
-    obj.layout.("scene" + xsource) = scene;
+    obj.data{dataIndex}.showlegend = getShowLegend(plotData);
 end
 
 function quiverBarb = getQuiverBarb2D(...

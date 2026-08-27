@@ -3,7 +3,7 @@ function obj = updateAlternativeBoxplot(obj, dataIndex)
 
 	axIndex = obj.getAxisIndex(obj.State.Plot(dataIndex).AssociatedAxis);
 	plotStructure = obj.State.Plot(dataIndex).Handle;
-	plotData = plotStructure.Children;
+	plotData = get(plotStructure, 'Children');
 
 	nTraces = length(plotData);
 	traceIndex = dataIndex;
@@ -25,13 +25,13 @@ function updateBoxplotLine(obj, axIndex, plotData, traceIndex)
 	[xSource, ySource] = findSourceAxis(obj, axIndex);
 
 	%-get trade data-%
-	xData = plotData.XData;
-	yData = plotData.YData;
+	xData = get(plotData, 'XData');
+	yData = get(plotData, 'YData');
 
-    if isduration(xData) || isdatetime(xData)
+    if isa(xData, "duration") || isa(xData, "datetime")
         xData = datenum(xData);
     end
-    if isduration(yData) || isdatetime(yData)
+    if isa(yData, "duration") || isa(yData, "datetime")
         yData = datenum(yData);
     end
 
@@ -45,8 +45,8 @@ function updateBoxplotLine(obj, axIndex, plotData, traceIndex)
     %-set trace-%
     obj.data{traceIndex}.type = 'scatter';
     obj.data{traceIndex}.mode = getScatterMode(plotData);
-    obj.data{traceIndex}.visible = strcmp(plotData.Visible,'on');
-    obj.data{traceIndex}.name = plotData.DisplayName;
+    obj.data{traceIndex}.visible = strcmp(get(plotData, 'Visible'),'on');
+    obj.data{traceIndex}.name = get(plotData, 'DisplayName');
     obj.data{traceIndex}.xaxis = sprintf('x%d', xSource);
     obj.data{traceIndex}.yaxis = sprintf('y%d', ySource);
 
@@ -57,12 +57,7 @@ function updateBoxplotLine(obj, axIndex, plotData, traceIndex)
     obj.data{traceIndex}.marker = extractLineMarker(plotData);
     obj.data{traceIndex}.line = extractLineLine(plotData);
 
-    switch plotData.Annotation.LegendInformation.IconDisplayStyle
-        case "on"
-            obj.data{traceIndex}.showlegend = true;
-        case "off"
-            obj.data{traceIndex}.showlegend = false;
-    end
+    obj.data{traceIndex}.showlegend = getShowLegend(plotData);
 
     if isempty(obj.data{traceIndex}.name)
         obj.data{traceIndex}.showlegend = false;

@@ -56,7 +56,7 @@ if ~MRSCont.flags.didSeg
 end
 
 %% Setup figure
-out = figure;  
+out = figure('Visible','off');
 if ~plot_mask
     tiledlayout(4,1,'TileSpacing','compact')
 else
@@ -121,7 +121,8 @@ if plot_mask
         colormap('gray');
     end
 end
-
+drawnow limitrate nocallbacks;
+set(gcf,'Visible','on');
 
 
 

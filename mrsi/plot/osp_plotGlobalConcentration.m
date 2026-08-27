@@ -38,7 +38,7 @@ if ~MRSCont.flags.didOverview
 end
 
 %% Setup figure
-out = figure;
+out = figure('Visible','off');
 set(out, 'Color', [1 1 1]); 
 tiledlayout(2,4,'TileSpacing','compact')
 
@@ -102,7 +102,13 @@ colormap gray
 axis image
 box off
 axis off;
-clim([MRSCont.GlobalConc.(quantification).(metabolite).residual_min MRSCont.GlobalConc.(quantification).(metabolite).Q_max]) 
+
+if exist('clim') % after R2022a
+    clim([MRSCont.GlobalConc.(quantification).(metabolite).residual_min MRSCont.GlobalConc.(quantification).(metabolite).Q_max]) 
+else
+    caxis([MRSCont.GlobalConc.(quantification).(metabolite).residual_min MRSCont.GlobalConc.(quantification).(metabolite).Q_max]) 
+end
+
 set(gca,'TickDir','out')
 title([metabolite ' Map'],'interpreter','none')
 
@@ -123,7 +129,13 @@ colormap gray
 axis image
 box off
 axis off;
-clim([MRSCont.GlobalConc.(quantification).(metabolite).residual_min MRSCont.GlobalConc.(quantification).(metabolite).Q_max])
+
+if exist('clim') % after R2022a
+    clim([MRSCont.GlobalConc.(quantification).(metabolite).residual_min MRSCont.GlobalConc.(quantification).(metabolite).Q_max]) 
+else
+    caxis([MRSCont.GlobalConc.(quantification).(metabolite).residual_min MRSCont.GlobalConc.(quantification).(metabolite).Q_max]) 
+end
+
 set(gca,'TickDir','out')
 title([metabolite ' Prediction Map'],'interpreter','none')
 
@@ -134,11 +146,20 @@ colormap gray
 axis image
 box off
 axis off;
-clim([MRSCont.GlobalConc.(quantification).(metabolite).residual_min MRSCont.GlobalConc.(quantification).(metabolite).Q_max])
+
+if exist('clim') % after R2022a
+    clim([MRSCont.GlobalConc.(quantification).(metabolite).residual_min MRSCont.GlobalConc.(quantification).(metabolite).Q_max]) 
+else
+    caxis([MRSCont.GlobalConc.(quantification).(metabolite).residual_min MRSCont.GlobalConc.(quantification).(metabolite).Q_max]) 
+end
+
 set(gca,'TickDir','out')
 cbar = colorbar;
 cbar.Label.String = [quantification ' concentration (i.u.)'];
 title('Model Residual Map')
+
+drawnow limitrate nocallbacks;
+set(gcf,'Visible','on');
 
 end
 

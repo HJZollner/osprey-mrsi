@@ -157,11 +157,7 @@ else
 end
 
 %% Setup figure
-if ~MRSCont.flags.isGUI
-    out = figure;   
-else
-    out = figure('Visible','off');
-end
+out = figure('Visible','off');
 
 %% Get colormap
 if ~viridis_map
@@ -348,7 +344,12 @@ else
     colormap gray
 end
 
-clim([0 max_val]);
+if exist('clim') % after R2022a
+    clim([0 max_val]);
+else
+    caxis([0 max_val])
+end
+
 axis tight;
 axis off;
 
@@ -373,5 +374,8 @@ if cbar
 end
 
 hold off;
+
+drawnow limitrate nocallbacks;
+set(gcf,'Visible','on');
 
 end

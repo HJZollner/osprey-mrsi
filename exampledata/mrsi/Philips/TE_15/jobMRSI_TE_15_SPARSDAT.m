@@ -361,7 +361,7 @@ opts.MRSI.report.atlasregion = {'Thal_L'};
 
 % Specify metabolite data
 % (MANDATORY)
-files       = {which(fullfile('exampledata','mrsi','Philips','TE_15','mrs','5SL_TE_15_MRSI_raw_act_noID.sdat'))};
+files       = {which(fullfile('exampledata','mrsi','Philips','TE_15','mrs','5SL_TE_15_MRSI_raw_act_noID.SDAT'))};
 
 % Specify water reference data for eddy-current correction (same sequence as metabolite data!)
 % (OPTIONAL)
@@ -371,7 +371,7 @@ files_ref   =  {};
 
 % Specify water data for quantification (e.g. short-TE water scan)
 % (OPTIONAL)
-files_w     = {which(fullfile('exampledata','mrsi','Philips','TE_15','mrs','5SL_H2O_MRSI_raw_act_noID.sdat'))};
+files_w     = {which(fullfile('exampledata','mrsi','Philips','TE_15','mrs','5SL_H2O_MRSI_raw_act_noID.SDAT'))};
 
 % Specify T1-weighted structural imaging data
 % (OPTIONAL)

@@ -9,9 +9,9 @@ function data = updateStem(obj, dataIndex)
     [xsource, ysource] = findSourceAxis(obj,axIndex);
 
     %-get coordinate x,y,z data-%
-    xdata = stem_data.XData;
-    ydata = stem_data.YData;
-    zdata = stem_data.ZData;
+    xdata = get(stem_data, 'XData');
+    ydata = get(stem_data, 'YData');
+    zdata = get(stem_data, 'ZData');
     npoints = length(xdata);
 
     %-check if stem-%
@@ -19,18 +19,18 @@ function data = updateStem(obj, dataIndex)
 
     %-SCENE-%
     if isstem
-        scene = obj.layout.("scene" + xsource);
+        scene = obj.layout.(sprintf("scene%d", xsource));
     else
-        xaxis = obj.layout.("xaxis" + xsource);
-        yaxis = obj.layout.("yaxis" + xsource);
+        xaxis = obj.layout.(sprintf("xaxis%d", xsource));
+        yaxis = obj.layout.(sprintf("yaxis%d", xsource));
     end
 
     %-scatter3d scene-%
     if isstem
-        data.scene = "scene" + xsource;
+        data.scene = sprintf("scene%d", xsource);
     else
-        data.xaxis = "x" + xsource;
-        data.yaxis = "y" + xsource;
+        data.xaxis = sprintf("x%d", xsource);
+        data.yaxis = sprintf("y%d", xsource);
     end
 
     %-scatter3d type-%
@@ -40,14 +40,14 @@ function data = updateStem(obj, dataIndex)
         data.type = "scatter";
     end
 
-    data.visible = stem_data.Visible == "on";
-    data.name = stem_data.DisplayName;
+    data.visible = strcmp(get(stem_data, 'Visible'), "on");
+    data.name = get(stem_data, 'DisplayName');
     data.mode = "lines+markers";
 
-    if isdatetime(xdata)
+    if isa(xdata, "datetime")
         xdata = datenum(xdata);
     end
-    if isdatetime(ydata)
+    if isa(ydata, "datetime")
         ydata = datenum(ydata);
     end
 
@@ -84,14 +84,14 @@ function data = updateStem(obj, dataIndex)
         %-fix marker symbol-%
         symbol = data.marker.symbol;
 
-        if contains(lower(symbol), ["asterisk-open" "cross-thin-open"])
+        if any(cellfun(@(p) ~isempty(strfind(lower(symbol), p)), {'asterisk-open', 'cross-thin-open'}))
             data.marker.symbol = "cross";
         end
 
         data.marker.size = data.marker.size * 0.6;
 
         %-fix dash line-%
-        if lower(data.line.dash) == "dash"
+        if strcmpi(data.line.dash, "dash")
             data.line.dash = "dot";
         end
     end
@@ -206,19 +206,19 @@ function data = updateStem(obj, dataIndex)
         scene.yaxis.tickcolor = "rgba(0,0,0,0.8)";
         scene.zaxis.tickcolor = "rgba(0,0,0,0.8)";
 
-        scene.xaxis.range = stem_data.Parent.XLim;
-        scene.yaxis.range = stem_data.Parent.YLim;
-        scene.zaxis.range = stem_data.Parent.ZLim;
+        scene.xaxis.range = get(get(stem_data, 'Parent'), 'XLim');
+        scene.yaxis.range = get(get(stem_data, 'Parent'), 'YLim');
+        scene.zaxis.range = get(get(stem_data, 'Parent'), 'ZLim');
 
-        scene.xaxis.tickvals = stem_data.Parent.XTick;
-        scene.yaxis.tickvals = stem_data.Parent.YTick;
-        scene.zaxis.tickvals = stem_data.Parent.ZTick;
+        scene.xaxis.tickvals = get(get(stem_data, 'Parent'), 'XTick');
+        scene.yaxis.tickvals = get(get(stem_data, 'Parent'), 'YTick');
+        scene.zaxis.tickvals = get(get(stem_data, 'Parent'), 'ZTick');
 
-        scene.xaxis.title = stem_data.Parent.XLabel.String;
-        scene.yaxis.title = stem_data.Parent.YLabel.String;
-        scene.zaxis.title = stem_data.Parent.ZLabel.String;
+        scene.xaxis.title = get(get(get(stem_data, 'Parent'), 'XLabel'), 'String');
+        scene.yaxis.title = get(get(get(stem_data, 'Parent'), 'YLabel'), 'String');
+        scene.zaxis.title = get(get(get(stem_data, 'Parent'), 'ZLabel'), 'String');
 
-        obj.layout.("scene" + xsource) = scene;
+        obj.layout.(sprintf("scene%d", xsource)) = scene;
     else
         yaxis.zeroline = true;
 
@@ -228,13 +228,13 @@ function data = updateStem(obj, dataIndex)
         xaxis.tickcolor = "rgba(0,0,0,0.4)";
         yaxis.tickcolor = "rgba(0,0,0,0.4)";
 
-        xaxis.tickvals = stem_data.Parent.XTick;
-        yaxis.tickvals = stem_data.Parent.YTick;
+        xaxis.tickvals = get(get(stem_data, 'Parent'), 'XTick');
+        yaxis.tickvals = get(get(stem_data, 'Parent'), 'YTick');
 
-        xaxis.title = stem_data.Parent.XLabel.String;
-        yaxis.title = stem_data.Parent.YLabel.String;
+        xaxis.title = get(get(get(stem_data, 'Parent'), 'XLabel'), 'String');
+        yaxis.title = get(get(get(stem_data, 'Parent'), 'YLabel'), 'String');
 
-        obj.layout.("xaxis" + xsource) = xaxis;
-        obj.layout.("yaxis" + ysource) = yaxis;
+        obj.layout.(sprintf("xaxis%d", xsource)) = xaxis;
+        obj.layout.(sprintf("yaxis%d", ysource)) = yaxis;
     end
 end

@@ -9,10 +9,17 @@ function obj = updateSurf(obj, surfaceIndex)
     meshData = obj.State.Plot(surfaceIndex).Handle;
 
     %-AXIS STRUCTURE-%
-    axisData = ancestor(meshData.Parent,'axes');
+    axisData = ancestor(get(meshData, 'Parent'),'axes');
+
+    %-pie3 side walls (the strips around the slices) carry no tooltip;
+    %-only the slice faces do-%
+    fig = ancestor(meshData, 'figure');
+    if any(arrayfun(@(p) isPieSlice(p), findall(fig, 'type', 'patch')))
+        obj.PlotlyDefaults.skipSurfaceHover = true;
+    end
 
     %-SCENE DATA-%
-    scene = obj.layout.("scene" + xsource);
+    scene = obj.layout.(sprintf("scene%d", xsource));
 
     %-GET CONTOUR INDEX-%
     obj.PlotOptions.nPlots = obj.PlotOptions.nPlots + 1;
@@ -29,11 +36,13 @@ function obj = updateSurf(obj, surfaceIndex)
     %-scatter3d type for contour mesh lines-%
     obj.data{contourIndex}.type = 'scatter3d';
     obj.data{contourIndex}.mode = 'lines';
+    %-the mesh lines are decoration; hovering them shows nothing-%
+    obj.data{contourIndex}.hoverinfo = 'skip';
 
     %-get plot data-%
-    xData = meshData.XData;
-    yData = meshData.YData;
-    zData = meshData.ZData;
+    xData = get(meshData, 'XData');
+    yData = get(meshData, 'YData');
+    zData = get(meshData, 'ZData');
 
     if isvector(xData)
         [xData, yData] = meshgrid(xData, yData);
@@ -88,48 +97,37 @@ function obj = updateSurf(obj, surfaceIndex)
     %-COLORING-%
 
     %-get colormap-%
-    cMap = axisData.Colormap;
-    fac = 1/(length(cMap)-1);
-    colorScale = {};
-
-    for c = 1: length(cMap)
-        colorScale{c} = {(c-1)*fac, ...
-                getStringColor(round(255*cMap(c, :)))};
-    end
+    cMap = get(axisData, 'Colormap');
+    colorScale = getColorScale(cMap);
+    tmpCLim = get(axisData, 'CLim');
 
     %-get edge color-%
-    if isnumeric(meshData.EdgeColor)
-        cDataContour = getStringColor(round(255*meshData.EdgeColor));
+    if isnumeric(get(meshData, 'EdgeColor'))
+        cDataContour = getStringColor(round(255*get(meshData, 'EdgeColor')));
 
-    elseif strcmpi(meshData.EdgeColor, 'interp')
+    elseif strcmpi(get(meshData, 'EdgeColor'), 'interp')
         cDataContour = zDataContour(:);
         obj.data{contourIndex}.line.colorscale = colorScale;
 
         obj.data{surfaceIndex}.contours.x.show = false;
         obj.data{surfaceIndex}.contours.y.show = false;
 
-    elseif strcmpi(meshData.EdgeColor, 'flat')
-        cData = meshData.CData;
+    elseif strcmpi(get(meshData, 'EdgeColor'), 'flat')
+        cData = get(meshData, 'CData');
 
         if size(cData, 3) ~= 1
             cMap = unique( reshape(cData, ...
                 [size(cData,1)*size(cData,2), size(cData,3)]), 'rows' );
-            cData = rgb2ind(cData, cMap);
+            cData = quantizeColors(cData);
 
-            edgeColorScale = {};
-            fac = 1/(length(cMap)-1);
-
-            for c = 1: length(cMap)
-                edgeColorScale{c} = {(c-1)*fac , ...
-                        getStringColor(round(255*cMap(c, :)))};
-            end
+            edgeColorScale = getColorScale(cMap);
 
             obj.data{surfaceIndex}.line.cmin = 0;
             obj.data{surfaceIndex}.line.cmax = 255;
             obj.data{contourIndex}.line.colorscale = edgeColorScale;
         else
-            obj.data{contourIndex}.line.cmin = axisData.CLim(1);
-            obj.data{contourIndex}.line.cmax = axisData.CLim(2);
+            obj.data{contourIndex}.line.cmin = tmpCLim(1);
+            obj.data{contourIndex}.line.cmax = tmpCLim(2);
             obj.data{contourIndex}.line.colorscale = colorScale;
         end
 
@@ -141,7 +139,7 @@ function obj = updateSurf(obj, surfaceIndex)
         obj.data{surfaceIndex}.contours.x.show = false;
         obj.data{surfaceIndex}.contours.y.show = false;
 
-    elseif strcmpi(meshData.EdgeColor, 'none')
+    elseif strcmpi(get(meshData, 'EdgeColor'), 'none')
         cDataContour = 'rgba(0,0,0,0)';
         obj.data{surfaceIndex}.contours.x.show = false;
         obj.data{surfaceIndex}.contours.y.show = false;
@@ -153,7 +151,7 @@ function obj = updateSurf(obj, surfaceIndex)
     obj.data{surfaceIndex}.contours.y.color = cDataContour;
 
     %-get face color-%
-    faceColor = meshData.FaceColor;
+    faceColor = get(meshData, 'FaceColor');
 
     if isnumeric(faceColor)
         if all(faceColor == [1, 1, 1])
@@ -166,16 +164,23 @@ function obj = updateSurf(obj, surfaceIndex)
             end
         end
 
-        [cDataSurface, cMapSurface] = rgb2ind(cDataSurface, 256);
-        cDataSurface = double(cDataSurface) + axisData.CLim(1);
+        [cDataSurface, cMapSurface] = quantizeColors(cDataSurface);
+        cDataSurface = double(cDataSurface) + tmpCLim(1);
 
-        for c = 1: size(cMapSurface, 1)
-            colorScale{c} = {(c-1)*fac, ...
-                    getStringColor(round(255*cMapSurface(c, :)), 1)};
+        if size(cMapSurface, 1) == 1
+            % a single-color colormap must still have two stops for
+            % plotly to interpolate over the whole range
+            colorScale = {{0, getStringColor(round(255*cMapSurface(1, :)), 1)}, ...
+                {1, getStringColor(round(255*cMapSurface(1, :)), 1)}};
+        else
+            for c = 1: size(cMapSurface, 1)
+                colorScale{c} = {(c-1)/(size(cMapSurface, 1)-1), ...
+                        getStringColor(round(255*cMapSurface(c, :)), 1)};
+            end
         end
 
-        obj.data{surfaceIndex}.cmin = axisData.CLim(1);
-        obj.data{surfaceIndex}.cmax = axisData.CLim(2);
+        obj.data{surfaceIndex}.cmin = tmpCLim(1);
+        obj.data{surfaceIndex}.cmax = tmpCLim(2);
     elseif strcmpi(faceColor, 'interp')
         cDataSurface = zDataSurface;
 
@@ -195,23 +200,17 @@ function obj = updateSurf(obj, surfaceIndex)
             end
         end
     elseif strcmpi(faceColor, 'flat')
-        cData = meshData.CData;
+        cData = get(meshData, 'CData');
         if size(cData, 3) ~= 1
             cMap = unique( reshape(cData, ...
                 [size(cData,1)*size(cData,2), size(cData,3)]), 'rows' );
-            cDataSurface = rgb2ind(cData, cMap);
+            cDataSurface = quantizeColors(cData);
 
-            colorScale = {};
-            fac = 1/(length(cMap)-1);
-
-            for c = 1: length(cMap)
-                colorScale{c} = {(c-1)*fac, ...
-                        getStringColor(round(255*cMap(c, :)))};
-            end
+            colorScale = getColorScale(cMap);
         else
             cDataSurface = cData;
-            obj.data{surfaceIndex}.cmin = axisData.CLim(1);
-            obj.data{surfaceIndex}.cmax = axisData.CLim(2);
+            obj.data{surfaceIndex}.cmin = tmpCLim(1);
+            obj.data{surfaceIndex}.cmax = tmpCLim(2);
         end
     end
 
@@ -220,14 +219,23 @@ function obj = updateSurf(obj, surfaceIndex)
     obj.data{surfaceIndex}.surfacecolor = cDataSurface;
 
     %-lighting settings-%
-    if isnumeric(meshData.FaceColor) && all(meshData.FaceColor == [1, 1, 1])
-        obj.data{surfaceIndex}.lighting.diffuse = 0.5;
-        obj.data{surfaceIndex}.lighting.ambient = 0.725;
+    if isnumeric(get(meshData, 'FaceColor')) && all(get(meshData, 'FaceColor') == [1, 1, 1])
+        % the native mesh faces are plain white; render them without
+        % any shading so they stay white
+        obj.data{surfaceIndex}.lighting.diffuse = 0;
+        obj.data{surfaceIndex}.lighting.ambient = 1;
+    elseif ~isnumeric(get(meshData, 'FaceColor')) ...
+            && ~strcmpi(get(meshData, 'FaceColor'), 'none')
+        % the native (OpenGL) renderer shades the faces gently; tone
+        % down plotly's default lighting to match the brightness
+        obj.data{surfaceIndex}.lighting.diffuse = 0.4;
+        obj.data{surfaceIndex}.lighting.ambient = 0.75;
+        obj.data{surfaceIndex}.lighting.specular = 0;
     end
 
-    if meshData.FaceAlpha ~= 1
+    if get(meshData, 'FaceAlpha') ~= 1
         obj.data{surfaceIndex}.lighting.diffuse = 0.5;
-        obj.data{surfaceIndex}.lighting.ambient = 0.725 + (1-meshData.FaceAlpha);
+        obj.data{surfaceIndex}.lighting.ambient = 0.725 + (1-get(meshData, 'FaceAlpha'));
     end
 
     if obj.PlotlyDefaults.IsLight
@@ -235,10 +243,10 @@ function obj = updateSurf(obj, surfaceIndex)
         obj.data{surfaceIndex}.lighting.ambient = 0.3;
     end
 
-    obj.data{surfaceIndex}.opacity = meshData.FaceAlpha;
-    obj.data{contourIndex}.line.width = 3*meshData.LineWidth;
+    obj.data{surfaceIndex}.opacity = get(meshData, 'FaceAlpha');
+    obj.data{contourIndex}.line.width = 3*get(meshData, 'LineWidth');
 
-    if strcmpi(meshData.LineStyle, '-')
+    if strcmpi(get(meshData, 'LineStyle'), '-')
         obj.data{contourIndex}.line.dash = 'solid';
     else
         obj.data{contourIndex}.line.dash = 'dot';
@@ -247,118 +255,17 @@ function obj = updateSurf(obj, surfaceIndex)
     end
 
     %-SCENE CONFIGURATION-%
-
-    %-aspect ratio-%
-    asr = obj.PlotOptions.AspectRatio;
-
-    if ~isempty(asr)
-        if ischar(asr)
-            scene.aspectmode = asr;
-        elseif isvector(ar) && length(asr) == 3
-            zar = asr(3);
-        end
-    else
-        %-define as default-%
-        xar = max(xData(:));
-        yar = max(yData(:));
-        xyar = max([xar, yar]);
-        zar = 0.75*xyar;
-    end
-
-    scene.aspectratio.x = 1.1*xyar;
-    scene.aspectratio.y = 1.0*xyar;
-    scene.aspectratio.z = zar;
-
-    %-camera eye-%
-    ey = obj.PlotOptions.CameraEye;
-
-    if ~isempty(ey)
-        if isvector(ey) && length(ey) == 3
-            scene.camera.eye.x = ey(1);
-            scene.camera.eye.y = ey(2);
-            scene.camera.eye.z = ey(3);
-        end
-    else
-        %-define as default-%
-        xey = - xyar;
-        if xey>0
-            xfac = -0.0;
-        else
-            xfac = 0.0;
-        end
-        yey = - xyar;
-        if yey>0
-            yfac = -0.3;
-        else
-            yfac = 0.3;
-        end
-        if zar>0
-            zfac = -0.1;
-        else
-            zfac = 0.1;
-        end
-
-        scene.camera.eye.x = xey + xfac*xey;
-        scene.camera.eye.y = yey + yfac*yey;
-        scene.camera.eye.z = zar + zfac*zar;
-    end
-
-    %-scene axis configuration-%
-    scene.xaxis.range = axisData.XLim;
-    scene.yaxis.range = axisData.YLim;
-    scene.zaxis.range = axisData.ZLim;
-
-    scene.xaxis.tickvals = axisData.XTick;
-    scene.xaxis.ticktext = axisData.XTickLabel;
-
-    scene.yaxis.tickvals = axisData.YTick;
-    scene.yaxis.ticktext = axisData.YTickLabel;
-
-    scene.zaxis.tickvals = axisData.ZTick;
-    scene.zaxis.ticktext = axisData.ZTickLabel;
-
-    scene.xaxis.zeroline = false;
-    scene.yaxis.zeroline = false;
-    scene.zaxis.zeroline = false;
-
-    scene.xaxis.showline = true;
-    scene.yaxis.showline = true;
-    scene.zaxis.showline = true;
-
-    scene.xaxis.tickcolor = 'rgba(0,0,0,1)';
-    scene.yaxis.tickcolor = 'rgba(0,0,0,1)';
-    scene.zaxis.tickcolor = 'rgba(0,0,0,1)';
-
-    scene.xaxis.ticklabelposition = 'outside';
-    scene.yaxis.ticklabelposition = 'outside';
-    scene.zaxis.ticklabelposition = 'outside';
-
-    scene.xaxis.title = axisData.XLabel.String;
-    scene.yaxis.title = axisData.YLabel.String;
-    scene.zaxis.title = axisData.ZLabel.String;
-
-    scene.xaxis.tickfont.size = axisData.FontSize;
-    scene.yaxis.tickfont.size = axisData.FontSize;
-    scene.zaxis.tickfont.size = axisData.FontSize;
-
-    scene.xaxis.tickfont.family = matlab2plotlyfont(axisData.FontName);
-    scene.yaxis.tickfont.family = matlab2plotlyfont(axisData.FontName);
-    scene.zaxis.tickfont.family = matlab2plotlyfont(axisData.FontName);
-
-    %-SET SCENE TO LAYOUT-%
-    obj.layout.("scene" + xsource) = scene;
-
-    obj.data{surfaceIndex}.name = meshData.DisplayName;
-    obj.data{contourIndex}.name = meshData.DisplayName;
+    updateScene(obj, surfaceIndex);
+    obj.data{surfaceIndex}.name = get(meshData, 'DisplayName');
+    obj.data{contourIndex}.name = get(meshData, 'DisplayName');
     obj.data{surfaceIndex}.showscale = false;
     obj.data{contourIndex}.showscale = false;
-    obj.data{surfaceIndex}.visible = strcmp(meshData.Visible,'on');
-    obj.data{contourIndex}.visible = strcmp(meshData.Visible,'on');
+    obj.data{surfaceIndex}.visible = strcmp(get(meshData, 'Visible'),'on');
+    obj.data{contourIndex}.visible = strcmp(get(meshData, 'Visible'),'on');
 
-    switch meshData.Annotation.LegendInformation.IconDisplayStyle
-        case "on"
-            obj.data{surfaceIndex}.showlegend = true;
-        case "off"
-            obj.data{surfaceIndex}.showlegend = false;
+    obj.data{surfaceIndex}.showlegend = getShowLegend(meshData);
+    if obj.PlotlyDefaults.skipSurfaceHover
+        obj.data{surfaceIndex}.hoverinfo = 'skip';
+        obj.PlotlyDefaults.skipSurfaceHover = false;
     end
 end

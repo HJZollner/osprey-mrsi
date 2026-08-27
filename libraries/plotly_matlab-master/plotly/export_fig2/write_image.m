@@ -1,32 +1,32 @@
-function output = write_image(pfObj, imageFormat, filename, height, width, scale)
+function output = write_image(pfObj, varargin)
     % Function to write plotly figures to a supported image format, which
     % are the following: "png", "jpg", "jpeg", "webp", "svg", "pdf", "eps",
     % "json".
-
-    debug=0;
-    if nargin < 2
-        imageFormat = "png";
-        filename = "figure.png";
-        height = pfObj.layout.height;
-        width = pfObj.layout.width;
-        scale = 1;
-    elseif nargin < 3
-        filename = "figure." + imageFormat;
-        height = pfObj.layout.height;
-        width = pfObj.layout.width;
-        scale = 1;
-    elseif nargin < 4
-        height = pfObj.layout.height;
-        width = pfObj.layout.width;
-        scale = 1;
-    elseif nargin < 5
-        width = pfObj.layout.width;
-        scale = 1;
-    elseif nargin < 6
-        scale = 1;
+    options.imageFormat = "png";
+    options.filename = "";
+    options.height = pfObj.layout.height;
+    options.width = pfObj.layout.width;
+    options.scale = 1;
+    nargs = numel(varargin);
+    if mod(nargs, 2) ~= 0
+        error("write_image:options", "Arguments must be provided as Name, Value pairs.");
+    end
+    for k = 1:2:nargs
+        options.(varargin{k}) = varargin{k+1};
     end
 
-    if strcmpi(imageFormat, "jpg")
+    % Set default filename based on imageFormat if not provided
+    if strcmp(options.filename, "")
+        options.filename = sprintf("figure.%s", options.imageFormat);
+    end
+
+    imageFormat = options.imageFormat;
+    filename = options.filename;
+    height = options.height;
+    width = options.width;
+    scale = options.scale;
+
+    if strcmp(imageFormat, "jpg")
         imageFormat = "jpeg";
     end
 
@@ -39,79 +39,74 @@ function output = write_image(pfObj, imageFormat, filename, height, width, scale
     end
 
     if isunix()
-        kExec = string(fullfile(wd,"kaleido", "kaleido"));
+        kExec = fullfile(wd,"kaleido", "kaleido");
         cc = "cat";
     else
-        kExec = string(fullfile(wd,"kaleido", "kaleido.cmd"));
+        kExec = fullfile(wd,"kaleido", "kaleido.cmd");
         cc = "type";
     end
-    plyJsLoc = string(fullfile(wd,"kaleido", "plotly-latest.min.js"));
+    plyJsLoc = fullfile(wd,"kaleido", "plotly-latest.min.js");
 
     if ~isfile(kExec) || ~isfile(plyJsLoc)
         status = getKaleido();
-    else
-        status = 1;
+        if status == 0
+            return
+        end
     end
 
-    if status == 0
-        return
-    end
-
-    mjLoc = replace(string(fullfile( ...
-            wd, "kaleido", "etc", "mathjax", "MathJax.js")), "\", "/");
-    scope="plotly";
+    mjLoc = strrep(fullfile( ...
+            wd, "kaleido", "etc", "mathjax", "MathJax.js"), '\', '/');
+    scope = "plotly";
 
     % Prepare input plotly object for Kaleido
-    q = struct();
-    q.data.data = pfObj.data;
-    q.data.layout = pfObj.layout;
-    q.data.layout = rmfield(q.data.layout, "height");
-    q.data.layout = rmfield(q.data.layout, "width");
-    q.format = string(imageFormat);
-    q.height = height;
-    q.scale = scale;
-    q.width = width;
+    q = struct( ...
+        "data", struct( ...
+            "data", {pfObj.data}, ...
+            "layout", rmfield(pfObj.layout, {"height" "width"}) ...
+        ), ...
+        "format", imageFormat, ...
+        "height", height, ...
+        "scale", scale, ...
+        "width", width ...
+    );
 
     pfJson = native2unicode(jsonencode(q), "UTF-8");
-    tFile = string(fullfile(wd, "kaleido", "temp.txt"));
+    tFile = fullfile(wd, "kaleido", "temp.txt");
     f = fopen(tFile, "w");
     fprintf(f, "%s", pfJson);
     fclose(f);
 
-    cmd = [cc, " ", tFile, " | ", kExec, " ", scope, " --plotlyjs='", ...
-            plyJsLoc, "' ", "--mathjax='file:///",mjLoc,"' " ...
-            + "--no-sandbox --disable-gpu " ...
-            + "--allow-file-access-from-files --disable-breakpad " ...
-            + "--disable-dev-shm-usage"];
+    cmd = sprintf(['%s %s | %s %s --plotlyjs=''%s'' --mathjax=''file:///%s'' ' ...
+            '--no-sandbox --disable-gpu ' ...
+            '--allow-file-access-from-files --disable-breakpad ' ...
+            '--disable-dev-shm-usage'], cc, tFile, kExec, scope, plyJsLoc, mjLoc);
 
-    if debug
-        inputCmd = char(join(cmd, ""));
-        fprintf("\nDebug info:\n%s\n\n", inputCmd);
-    end
-
-    [code,out] = system(char(join(cmd, "")));
-    if debug
-        disp(out);
-    end
+    [code,out] = system(cmd);
 
     if code ~= 0
         fprintf("\nFatal: Failed to run Kaleido.\n\n");
-        return;
-    else
-        a = string(split(out,newline));
-        if a(end) == ""
-            a(end) = [];
-        end
-        output = jsondecode(a(end));
+        return
     end
+
+    a = strsplit(out, newline);
+    if strcmp(a{end}, "")
+        a(end) = [];
+    end
+    output = jsondecode(a{end});
 
     if output.code ~= 0
         fprintf("\nError: %s\n", output.message);
-    else
-        out = unicode2native(output.result, "UTF-8");
-        out = matlab.net.base64decode(out);
-        f = fopen(char(filename), "wb");
-        fwrite(f, out);
-        fclose(f);
+        return
     end
+
+    if strcmp(imageFormat, "json") || strcmp(imageFormat, "svg")
+        out = unicode2native(output.result, "UTF-8");
+    elseif is_octave()
+        out = __base64_decode_bytes__(output.result);
+    else
+        out = matlab.net.base64decode(unicode2native(output.result, "UTF-8"));
+    end
+    f = fopen(char(filename), "wb");
+    fwrite(f, out);
+    fclose(f);
 end

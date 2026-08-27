@@ -29,9 +29,13 @@ function response = plotlyoffline(plotlyfig)
     end
 
     % handle plot div specs
-    id = char(java.util.UUID.randomUUID);
-    width = plotlyfig.layout.width + "px";
-    height = plotlyfig.layout.height + "px";
+    if is_octave()
+        id = sprintf('plotly-%d', floor(rand*1e15));
+    else
+        id = char(java.util.UUID.randomUUID);
+    end
+    width = sprintf('%gpx', plotlyfig.layout.width);
+    height = sprintf('%gpx', plotlyfig.layout.height);
 
     if plotlyfig.PlotOptions.ShowLinkText
         linkText = plotlyfig.PlotOptions.LinkText;
@@ -43,9 +47,6 @@ function response = plotlyoffline(plotlyfig)
     jData = m2json(plotlyfig.data);
     jLayout = m2json(plotlyfig.layout);
     jFrames = m2json(plotlyfig.frames);
-    clean_jData = escapechars(jData);
-    clean_jLayout = escapechars(jLayout);
-    clean_jFrames = escapechars(jFrames);
 
     % template environment vars
     plotlyDomain = plotlyfig.UserData.PlotlyDomain;
@@ -55,12 +56,14 @@ function response = plotlyoffline(plotlyfig)
             '</script>'], plotlyDomain, linkText);
 
     % template Plotly.plot
-    script = sprintf(['\n Plotly.plot("%s", {\n"data": %s,' ...
+    script = sprintf(['\n Plotly.newPlot("%s", {\n"data": %s,' ...
             '\n"layout": %s,\n"frames": %s\n}).then(function(){'...
+            '\n    if (typeof $ !== "undefined") {' ...
             '\n    $(".%s.loading").remove();' ...
             '\n    $(".link--embedview").text("%s");'...
-            '\n    });'], id, clean_jData, clean_jLayout, ...
-            clean_jFrames, id, linkText);
+            '\n    }' ...
+            '\n    });'], id, jData, jLayout, ...
+            jFrames, id, linkText);
 
     plotlyScript = sprintf(['\n<div id="%s" style="height: %s;', ...
             'width: %s;" class="plotly-graph-div"></div> \n', ...
@@ -82,7 +85,7 @@ function response = plotlyoffline(plotlyfig)
     plotlyOfflineFile = fullfile(plotlyfig.PlotOptions.SaveFolder, ...
             htmlFilename);
     fileID = fopen(plotlyOfflineFile, 'w');
-    fprintf(fileID, offlineScript);
+    fprintf(fileID, '%s', offlineScript);
     fclose(fileID);
 
     % remove any whitespace from the plotlyOfflineFile path

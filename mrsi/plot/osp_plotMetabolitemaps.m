@@ -163,11 +163,7 @@ else
 end
 
 %% Setup figure
-if ~MRSCont.flags.isGUI
-    out = figure;
-else
     out = figure('Visible','off');
-end
 
 %% Get colormap
 if ~viridis_map
@@ -380,7 +376,12 @@ if viridis_map
 else
     colormap gray
 end
-clim([0 max_val]);
+
+if exist('clim') % after R2022a
+    clim([0 max_val]);
+else
+    caxis([0 max_val])
+end
 
 %% Handle QC-specific colormap
 if contains(quantification,'QC') && ~contains(quantification,'QCfilt')
@@ -440,4 +441,6 @@ end
 
 hold off;
 
+drawnow limitrate nocallbacks;
+set(gcf,'Visible','on');
 end

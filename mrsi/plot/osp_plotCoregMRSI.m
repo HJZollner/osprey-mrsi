@@ -139,7 +139,7 @@ vertices_MRSI_voxel = (MRSI_vol.mat \ vertices_homogeneous')';
 vertices_MRSI_voxel = vertices_MRSI_voxel(:, 1:3);
 
 %% Setup figure
-out = figure;
+out = figure('Visible','off');
 set(out, 'Color', [0 0 0]);
 
 %% Calculate montage layout
@@ -220,5 +220,6 @@ if isfield(MRSCont, 'files_nii_MRSIloc') && ~isempty(MRSCont.files_nii_MRSIloc{1
         MRSCont.files_nii_MRSIloc{1} = strrep(MRSCont.files_nii_MRSIloc{1}, '.nii', '.nii.gz');
     end
 end
-
+drawnow limitrate nocallbacks;
+set(gcf,'Visible','on');
 end

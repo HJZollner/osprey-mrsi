@@ -10,66 +10,65 @@ function obj = updateFunctionSurface(obj, surfaceIndex)
     figureData = obj.State.Figure.Handle;
 
     %-AXIS STRUCTURE-%
-    axisData = ancestor(meshData.Parent,'axes');
+    axisData = ancestor(get(meshData, 'Parent'),'axes');
 
     %-get plot data-%
-    meshDensity = meshData.MeshDensity;
-    xData = meshData.XData(1:meshDensity^2);
-    yData = meshData.YData(1:meshDensity^2);
-    zData = meshData.ZData(1:meshDensity^2);
+    meshDensity = get(meshData, 'MeshDensity');
+    tmpXData = get(meshData, 'XData');
+    xData = tmpXData(1:meshDensity^2);
+    tmpYData = get(meshData, 'YData');
+    yData = tmpYData(1:meshDensity^2);
+    tmpZData = get(meshData, 'ZData');
+    zData = tmpZData(1:meshDensity^2);
 
     xDataSurface = reformatDataToMesh(xData, meshDensity);
     yDataSurface = reformatDataToMesh(yData, meshDensity);
     zDataSurface = reformatDataToMesh(zData, meshDensity);
 
-    surfaceData.scene = "scene" + xsource;
+    surfaceData.scene = sprintf("scene%d", xsource);
     surfaceData.type = "surface";
     surfaceData.x = xDataSurface;
     surfaceData.y = yDataSurface;
     surfaceData.z = zDataSurface;
-    surfaceData.name = meshData.DisplayName;
+    surfaceData.name = get(meshData, 'DisplayName');
     surfaceData.showscale = false;
-    surfaceData.visible = meshData.Visible == "on";
+    surfaceData.visible = strcmp(get(meshData, 'Visible'), "on");
 
-    contourData.scene = "scene" + xsource;
+    contourData.scene = sprintf("scene%d", xsource);
     contourData.type = "scatter3d";
     contourData.mode = "lines";
     contourData.x = getContourDataFromSurface(xDataSurface);
     contourData.y = getContourDataFromSurface(yDataSurface);
     contourData.z = getContourDataFromSurface(zDataSurface);
-    contourData.name = meshData.DisplayName;
+    contourData.name = get(meshData, 'DisplayName');
     contourData.showscale = false;
-    contourData.visible = meshData.Visible == "on";
+    contourData.visible = strcmp(get(meshData, 'Visible'), "on");
 
     %-COLORING-%
 
     %-get colormap-%
-    cMap = figureData.Colormap;
-    fac = 1/(length(cMap)-1);
-    colorScale = cell(1,length(cMap));
-
-    for c = 1:length(cMap)
-        colorScale{c} = {(c-1)*fac, getStringColor(round(255*cMap(c, :)))};
-    end
+    cMap = get(figureData, 'Colormap');
+    colorScale = getColorScale(cMap);
     %-get edge color-%
-    if isnumeric(meshData.EdgeColor)
-        cDataContour = getStringColor(round(255*meshData.EdgeColor));
-    elseif strcmpi(meshData.EdgeColor, "interp")
+    if isnumeric(get(meshData, 'EdgeColor'))
+        cDataContour = getStringColor(round(255*get(meshData, 'EdgeColor')));
+    elseif strcmpi(get(meshData, 'EdgeColor'), "interp")
         cDataContour = contourData.z;
         contourData.line.colorscale = colorScale;
-    elseif strcmpi(meshData.EdgeColor, "none")
+    elseif strcmpi(get(meshData, 'EdgeColor'), "none")
         cDataContour = "rgba(0,0,0,0)";
     end
 
     contourData.line.color = cDataContour;
 
-    if isnumeric(meshData.FaceColor)
+    if isnumeric(get(meshData, 'FaceColor'))
         for n = 1:size(zDataSurface, 2)
             for m = 1:size(zDataSurface, 1)
-                cDataSurface(m, n, :) = meshData.FaceColor;
+                cDataSurface(m, n, :) = get(meshData, 'FaceColor');
             end
         end
         [cDataSurface, cMapSurface] = rgb2ind(cDataSurface, 256);
+        fac = 1/255;
         for c = 1: size(cMapSurface, 1)
             colorScale{c} = { (c-1)*fac , getStringColor(round(255*cMapSurface(c, :)), 1)};
         end
@@ -94,41 +93,36 @@ function obj = updateFunctionSurface(obj, surfaceIndex)
     surfaceData.colorscale = colorScale;
     surfaceData.surfacecolor = cDataSurface;
 
-    if isnumeric(meshData.FaceColor) && all(meshData.FaceColor == [1, 1, 1])
+    if isnumeric(get(meshData, 'FaceColor')) && all(get(meshData, 'FaceColor') == [1, 1, 1])
         surfaceData.lighting.diffuse = 0.5;
         surfaceData.lighting.ambient = 0.725;
     end
-    if meshData.FaceAlpha ~= 1
+    if get(meshData, 'FaceAlpha') ~= 1
         surfaceData.lighting.diffuse = 0.5;
-        surfaceData.lighting.ambient = 0.725 + (1-meshData.FaceAlpha);
+        surfaceData.lighting.ambient = 0.725 + (1-get(meshData, 'FaceAlpha'));
     end
     if obj.PlotlyDefaults.IsLight
         surfaceData.lighting.diffuse = 1.0;
         surfaceData.lighting.ambient = 0.3;
     end
 
-    surfaceData.opacity = meshData.FaceAlpha;
-    contourData.line.width = 3*meshData.LineWidth;
-    contourData.line.dash = getLineDash(meshData.LineStyle);
+    surfaceData.opacity = get(meshData, 'FaceAlpha');
+    contourData.line.width = 3*get(meshData, 'LineWidth');
+    contourData.line.dash = getLineDash(get(meshData, 'LineStyle'));
 
-    switch meshData.Annotation.LegendInformation.IconDisplayStyle
-        case "on"
-            surfaceData.showlegend = true;
-        case "off"
-            surfaceData.showlegend = false;
-    end
+    surfaceData.showlegend = getShowLegend(meshData);
 
     obj.PlotOptions.nPlots = obj.PlotOptions.nPlots + 1;
     contourIndex = obj.PlotOptions.nPlots;
     obj.data{surfaceIndex} = surfaceData;
     obj.data{contourIndex} = contourData;
 
-    if lower(meshData.ShowContours) == "on"
+    if strcmpi(get(meshData, 'ShowContours'), "on")
         obj.PlotOptions.nPlots = obj.PlotOptions.nPlots + 1;
         projectionIndex = obj.PlotOptions.nPlots;
         obj.data{projectionIndex} = struct( ...
             "type", "surface", ...
-            "scene", "scene" + xsource, ...
+            "scene", sprintf("scene%d", xsource), ...
             "x", xDataSurface, ...
             "y", yDataSurface, ...
             "z", zDataSurface, ...
@@ -148,7 +142,7 @@ function obj = updateFunctionSurface(obj, surfaceIndex)
     end
 
     %-SCENE CONFIGURATION-%
-    scene = obj.layout.("scene" + xsource);
+    scene = obj.layout.(sprintf("scene%d", xsource));
 
     asr = obj.PlotOptions.AspectRatio;
 
@@ -203,40 +197,40 @@ function obj = updateFunctionSurface(obj, surfaceIndex)
         scene.camera.eye.z = zar + zfac*zar;
     end
 
-    scene.xaxis.range = axisData.XLim;
-    scene.xaxis.tickvals = axisData.XTick;
-    scene.xaxis.ticktext = axisData.XTickLabel;
+    scene.xaxis.range = get(axisData, 'XLim');
+    scene.xaxis.tickvals = get(axisData, 'XTick');
+    scene.xaxis.ticktext = get(axisData, 'XTickLabel');
     scene.xaxis.zeroline = false;
     scene.xaxis.showline = true;
     scene.xaxis.tickcolor = "rgba(0,0,0,1)";
     scene.xaxis.ticklabelposition = "outside";
-    scene.xaxis.title = axisData.XLabel.String;
-    scene.xaxis.tickfont.size = axisData.FontSize;
-    scene.xaxis.tickfont.family = matlab2plotlyfont(axisData.FontName);
+    scene.xaxis.title = get(get(axisData, 'XLabel'), 'String');
+    scene.xaxis.tickfont.size = get(axisData, 'FontSize');
+    scene.xaxis.tickfont.family = matlab2plotlyfont(get(axisData, 'FontName'));
 
-    scene.yaxis.range = axisData.YLim;
-    scene.yaxis.tickvals = axisData.YTick;
-    scene.yaxis.ticktext = axisData.YTickLabel;
+    scene.yaxis.range = get(axisData, 'YLim');
+    scene.yaxis.tickvals = get(axisData, 'YTick');
+    scene.yaxis.ticktext = get(axisData, 'YTickLabel');
     scene.yaxis.zeroline = false;
     scene.yaxis.showline = true;
     scene.yaxis.tickcolor = "rgba(0,0,0,1)";
     scene.yaxis.ticklabelposition = "outside";
-    scene.yaxis.title = axisData.YLabel.String;
-    scene.yaxis.tickfont.size = axisData.FontSize;
-    scene.yaxis.tickfont.family = matlab2plotlyfont(axisData.FontName);
+    scene.yaxis.title = get(get(axisData, 'YLabel'), 'String');
+    scene.yaxis.tickfont.size = get(axisData, 'FontSize');
+    scene.yaxis.tickfont.family = matlab2plotlyfont(get(axisData, 'FontName'));
 
-    scene.zaxis.range = axisData.ZLim;
-    scene.zaxis.tickvals = axisData.ZTick;
-    scene.zaxis.ticktext = axisData.ZTickLabel;
+    scene.zaxis.range = get(axisData, 'ZLim');
+    scene.zaxis.tickvals = get(axisData, 'ZTick');
+    scene.zaxis.ticktext = get(axisData, 'ZTickLabel');
     scene.zaxis.zeroline = false;
     scene.zaxis.showline = true;
     scene.zaxis.tickcolor = "rgba(0,0,0,1)";
     scene.zaxis.ticklabelposition = "outside";
-    scene.zaxis.title = axisData.ZLabel.String;
-    scene.zaxis.tickfont.size = axisData.FontSize;
-    scene.zaxis.tickfont.family = matlab2plotlyfont(axisData.FontName);
+    scene.zaxis.title = get(get(axisData, 'ZLabel'), 'String');
+    scene.zaxis.tickfont.size = get(axisData, 'FontSize');
+    scene.zaxis.tickfont.family = matlab2plotlyfont(get(axisData, 'FontName'));
 
-    obj.layout.("scene" + xsource) = scene;
+    obj.layout.(sprintf("scene%d", xsource)) = scene;
 end
 
 function surfaceData = reformatDataToMesh(data, meshDensity)

@@ -7,19 +7,35 @@ function data = updateContour3(obj,contourIndex)
 
     %-PLOT DATA STRUCTURE- %
     contour_data = obj.State.Plot(contourIndex).Handle;
+    axisData = obj.State.Plot(contourIndex).AssociatedAxis;
 
     %-CHECK FOR MULTIPLE AXES-%
     [xsource, ysource] = findSourceAxis(obj,axIndex);
 
-    data.xaxis = "x" + xsource;
-    data.yaxis = "y" + ysource;
-    data.name = contour_data.DisplayName;
+    %-detect meshc/surfc/ezmeshc/ezsurfc projection shadows-%
+    try
+        axChildren = get(axisData, 'Children');
+        types = get(axChildren, 'Type');
+        hasSurface = iscell(types) && any(strcmp(types, 'surface'));
+    catch
+        hasSurface = false;
+    end
+
+    if hasSurface
+        data = updateContour3Shadow(contour_data, axisData, ...
+            figure_data, xsource);
+        return
+    end
+
+    data.xaxis = sprintf("x%d", xsource);
+    data.yaxis = sprintf("y%d", ysource);
+    data.name = get(contour_data, 'DisplayName');
     data.type = "surface";
 
     %-setting the plot-%
-    xdata = contour_data.XData;
-    ydata = contour_data.YData;
-    zdata = contour_data.ZData;
+    xdata = get(contour_data, 'XData');
+    ydata = get(contour_data, 'YData');
+    zdata = get(contour_data, 'ZData');
 
     if isvector(xdata)
         [xdata, ydata] = meshgrid(xdata, ydata);
@@ -29,13 +45,14 @@ function data = updateContour3(obj,contourIndex)
     data.z = zdata;
 
     %-setting for contour lines z-direction-%
-    if length(contour_data.LevelList) > 1
-        zstart = contour_data.TextList(1);
-        zend = contour_data.TextList(end);
-        zsize = mean(diff(contour_data.TextList));
+    if length(get(contour_data, 'LevelList')) > 1
+        tmpTextList = get(contour_data, 'TextList');
+        zstart = tmpTextList(1);
+        zend = tmpTextList(end);
+        zsize = mean(diff(get(contour_data, 'TextList')));
     else
-        zstart = contour_data.TextList(1) - 1e-3;
-        zend = contour_data.TextList(end) + 1e-3;
+        zstart = tmpTextList(1) - 1e-3;
+        zend = tmpTextList(end) + 1e-3;
         zsize = 2e-3;
     end
 
@@ -45,11 +62,11 @@ function data = updateContour3(obj,contourIndex)
         "size", zsize, ...
         "show", true, ...
         "usecolormap", true, ...
-        "width", 2*contour_data.LineWidth ...
+        "width", 2*get(contour_data, 'LineWidth') ...
     );
     data.hidesurface = true;
 
-    colormap = figure_data.Colormap;
+    colormap = get(figure_data, 'Colormap');
     for c = 1:size((colormap),1)
         col = round(255*(colormap(c,:)));
         data.colorscale{c} = ...
@@ -115,14 +132,49 @@ function data = updateContour3(obj,contourIndex)
     obj.layout.scene.yaxis.zeroline = false;
     obj.layout.scene.zaxis.zeroline = false;
 
-    data.visible = contour_data.Visible == "on";
+    data.visible = strcmp(get(contour_data, 'Visible'), "on");
     data.showscale = false;
     data.reversescale = false;
 
-    switch contour_data.Annotation.LegendInformation.IconDisplayStyle
-        case "on"
-            data.showlegend = true;
-        case "off"
-            data.showlegend = false;
+    data.showlegend = getShowLegend(contour_data);
+end
+
+function data = updateContour3Shadow(contourData, axisData, figureData, xSource)
+    cMat = get(contourData, 'ContourMatrix');
+    zmin = get(axisData, 'ZLim');
+    zmin = zmin(1);
+    tmpCLim = get(axisData, 'CLim');
+    cMap = get(figureData, 'Colormap');
+
+    xData = [];
+    yData = [];
+    zData = [];
+    colorData = [];
+    len = size(cMat, 2);
+    n = 1;
+    while n < len
+        m = cMat(2, n);
+        level = cMat(1, n);
+        xData = [xData, cMat(1, n+1:n+m), NaN];
+        yData = [yData, cMat(2, n+1:n+m), NaN];
+        zData = [zData, zmin * ones(1, m), NaN];
+        colorData = [colorData, level * ones(1, m), NaN];
+        n = n + m + 1;
     end
+
+    data.scene = sprintf('scene%d', xSource);
+    data.type = 'scatter3d';
+    data.mode = 'lines';
+    data.x = xData;
+    data.y = yData;
+    data.z = zData;
+    data.name = get(contourData, 'DisplayName');
+    data.visible = strcmp(get(contourData, 'Visible'), 'on');
+    data.showscale = false;
+    data.showlegend = false;
+    data.line.color = colorData;
+    data.line.colorscale = getColorScale(cMap);
+    data.line.cmin = tmpCLim(1);
+    data.line.cmax = tmpCLim(2);
+    data.line.width = 2*get(contourData, 'LineWidth');
 end

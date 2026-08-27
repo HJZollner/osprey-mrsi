@@ -47,28 +47,29 @@ function data = updateHistogramPolar(obj,histIndex)
 
     hist_data = obj.State.Plot(histIndex).Handle;
 
-    data.type = "barpolar";
+    axIndex = obj.getAxisIndex(obj.State.Plot(histIndex).AssociatedAxis);
+    xsource = findSourceAxis(obj, axIndex);
+    data.subplot = sprintf('polar%d', xsource+1);
 
-    binedges = rad2deg(hist_data.BinEdges);
+    data.type = 'barpolar';
+
+    binedges = rad2deg(get(hist_data, 'BinEdges'));
     data.theta = binedges(1:end-1) + 0.5*diff(binedges);
     data.width = diff(binedges);
-    data.r = double(hist_data.BinCounts);
+    data.r = double(get(hist_data, 'BinCounts'));
 
-    data.name = hist_data.DisplayName;
+    data.name = get(hist_data, 'DisplayName');
     obj.layout.barmode = "group";
-    data.marker.line.width = hist_data.LineWidth;
+    data.marker.line.width = get(hist_data, 'LineWidth');
 
-    if ~ischar(hist_data.FaceAlpha)
-        data.opacity = hist_data.FaceAlpha;
+    if ~ischar(get(hist_data, 'FaceAlpha'))
+        data.opacity = get(hist_data, 'FaceAlpha');
     end
 
     data.marker = extractPatchFace(hist_data);
-    data.visible = hist_data.Visible == "on";
+    data.visible = strcmp(get(hist_data, 'Visible'), "on");
 
-    switch hist_data.Annotation.LegendInformation.IconDisplayStyle
-        case "on"
-            data.showlegend = true;
-        case "off"
-            data.showlegend = false;
-    end
+    data.showlegend = getShowLegend(hist_data);
+
+    updatePolarAxesLayout(obj, histIndex);
 end

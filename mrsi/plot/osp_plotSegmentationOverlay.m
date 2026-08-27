@@ -184,7 +184,12 @@ osp_plot_tissue_overlay(tissue_map, brain_mask, vertices_display, ...
 
 %% Setup colormap and colorbar
 colormap(custom_cmap);
-clim([0 1]);
+
+if exist('clim') % after R2022a
+    clim([0 1]);
+else
+    caxis([0 1])
+end
 
 if cbar
     cbar_map = colorbar;

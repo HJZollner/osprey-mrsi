@@ -43,40 +43,61 @@ function obj = updateAxis(obj,axIndex)
     %-AXIS DATA STRUCTURE-%
     axisData = obj.State.Axis(axIndex).Handle;
 
-    %-STANDARDIZE UNITS-%
-    axisUnits = axisData.Units;
-    axisData.Units = 'normalized';
-
-    if isprop(axisData, "FontUnits")
-        fontUnits = axisData.FontUnits;
-        axisData.FontUnits = 'points';
+    %-set plot background from axes color-%
+    if isprop(axisData, 'Color')
+        axColor = get(axisData, 'Color');
+        if isnumeric(axColor)
+            obj.layout.plot_bgcolor = getStringColor(round(255*axColor));
+        end
     end
 
-    %-check if headmap axis-%
-    isHeatmapAxis = axisData.Type == "heatmap";
-    obj.PlotOptions.is_headmap_axis = isHeatmapAxis;
+    %-Octave legends are axes objects tagged "legend"; they are handled
+    %-through the legend machinery instead of the axis machinery-%
+    try
+        if ischar(get(axisData, 'Tag')) && strcmp(get(axisData, 'Tag'), 'legend')
+            return
+        end
+    catch
+    end
+
+    %-STANDARDIZE UNITS-%
+    axisUnits = get(axisData, 'Units');
+    set(axisData, 'Units', 'normalized');
+
+    if isprop(axisData, "FontUnits")
+        fontUnits = get(axisData, 'FontUnits');
+        set(axisData, 'FontUnits', 'points');
+    end
+
+    %-check if heatmap axis-%
+    isHeatmapAxis = strcmp(get(axisData, 'Type'), "heatmap");
+    obj.PlotOptions.is_heatmap_axis = isHeatmapAxis;
 
     %-check if geo-axis-%
-    isGeoaxis = isfield(axisData, 'Type') ...
-            && strcmpi(axisData.Type, 'geoaxes');
+    isGeoaxis = isprop(axisData, 'Type') ...
+            && strcmpi(get(axisData, 'Type'), 'geoaxes');
     obj.PlotlyDefaults.isGeoaxis = isGeoaxis;
 
     if isHeatmapAxis
         xaxis = extractHeatmapAxisData(obj,axisData, 'X');
         xExponentFormat = 0;
-    else
-        [xaxis, xExponentFormat] = extractAxisData(obj,axisData, 'X');
-    end
-    if isHeatmapAxis
         yaxis = extractHeatmapAxisData(obj,axisData, 'Y');
         yExponentFormat = 0;
     else
+        [xaxis, xExponentFormat] = extractAxisData(obj,axisData, 'X');
         [yaxis, yExponentFormat] = extractAxisData(obj,axisData, 'Y');
     end
 
-    axisPos = axisData.Position .* obj.PlotOptions.DomainFactor;
+    axisPos = get(axisData, 'Position') .* obj.PlotOptions.DomainFactor;
     if obj.PlotOptions.AxisEqual
         axisPos(3:4) = min(axisPos(3:4));
+    end
+
+    if (ischar(get(axisData, 'Tag')) || isstring(get(axisData, 'Tag'))) && strcmp(get(axisData, 'Tag'), "yhist")
+        % scatterhist() function
+        [xaxis, yaxis] = deal(yaxis,xaxis);
+        [xaxis.side, yaxis.side] = deal(yaxis.side,xaxis.side);
+        xaxis.range = flip(xaxis.range);
     end
 
     xaxis.domain = min([axisPos(1) sum(axisPos([1,3]))], 1);
@@ -95,8 +116,8 @@ function obj = updateAxis(obj,axIndex)
         exponentText = sprintf('x10^%d', yExponentFormat);
 
         obj.layout.annotations{anIndex}.text = exponentText;
-        obj.layout.annotations{anIndex}.xref = "x" + xsource;
-        obj.layout.annotations{anIndex}.yref = "y" + ysource;
+        obj.layout.annotations{anIndex}.xref = sprintf("x%d", xsource);
+        obj.layout.annotations{anIndex}.yref = sprintf("y%d", ysource);
         obj.layout.annotations{anIndex}.xanchor = 'left';
         obj.layout.annotations{anIndex}.yanchor = 'bottom';
         obj.layout.annotations{anIndex}.font.size = yaxis.tickfont.size;
@@ -115,8 +136,8 @@ function obj = updateAxis(obj,axIndex)
         exponentText = sprintf('x10^%d', xExponentFormat);
 
         obj.layout.annotations{anIndex}.text = exponentText;
-        obj.layout.annotations{anIndex}.xref = "x" + xsource;
-        obj.layout.annotations{anIndex}.yref = "y" + ysource;
+        obj.layout.annotations{anIndex}.xref = sprintf("x%d", xsource);
+        obj.layout.annotations{anIndex}.yref = sprintf("y%d", ysource);
         obj.layout.annotations{anIndex}.xanchor = 'left';
         obj.layout.annotations{anIndex}.yanchor = 'bottom';
         obj.layout.annotations{anIndex}.font.size = xaxis.tickfont.size;
@@ -130,31 +151,31 @@ function obj = updateAxis(obj,axIndex)
         end
     end
 
-    xaxis.anchor = "y" + ysource;
-    yaxis.anchor = "x" + xsource;
+    xaxis.anchor = sprintf("y%d", ysource);
+    yaxis.anchor = sprintf("x%d", xsource);
 
     if xoverlay
-        xaxis.overlaying = "x" + xoverlay;
+        xaxis.overlaying = sprintf("x%d", xoverlay);
     end
     if yoverlay
-        yaxis.overlaying = "y" + yoverlay;
+        yaxis.overlaying = sprintf("y%d", yoverlay);
     end
 
     % update the layout field (do not overwrite source)
     if xsource == axIndex
-        obj.layout.("xaxis" + xsource) = xaxis;
-        obj.layout.("scene" + xsource) = scene;
+        obj.layout.(sprintf("xaxis%d", xsource)) = xaxis;
+        obj.layout.(sprintf("scene%d", xsource)) = scene;
     end
 
     % update the layout field (do not overwrite source)
     if ysource == axIndex
-        obj.layout.("yaxis" + ysource) = yaxis;
+        obj.layout.(sprintf("yaxis%d", ysource)) = yaxis;
     end
 
     %-REVERT UNITS-%
-    axisData.Units = axisUnits;
+    set(axisData, 'Units', axisUnits);
 
     if isprop(axisData, "FontUnits")
-        axisData.FontUnits = fontUnits;
+        set(axisData, 'FontUnits', fontUnits);
     end
 end

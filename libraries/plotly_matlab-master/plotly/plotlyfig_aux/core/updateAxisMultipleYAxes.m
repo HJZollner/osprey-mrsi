@@ -5,25 +5,26 @@ function obj = updateAxisMultipleYAxes(obj,axIndex,yaxIndex)
     axisData = obj.State.Axis(axIndex).Handle;
 
     %-STANDARDIZE UNITS-%
-    axisUnits = axisData.Units;
-    axisData.Units = 'normalized';
+    axisUnits = get(axisData, 'Units');
+    set(axisData, 'Units', 'normalized');
 
     if isprop(axisData, "FontUnits")
-        fontUnits = axisData.FontUnits;
-        axisData.FontUnits = 'points';
+        fontUnits = get(axisData, 'FontUnits');
+        set(axisData, 'FontUnits', 'points');
     end
 
     xaxis = extractAxisData(obj,axisData, 'X');
     yaxis = extractAxisDataMultipleYAxes(obj, axisData, yaxIndex);
 
     %-getting and setting position data-%
-    xo = axisData.Position(1);
-    yo = axisData.Position(2);
-    w = axisData.Position(3);
-    h = axisData.Position(4);
+    axisPosition = get(axisData, 'Position');
+    xo = axisPosition(1);
+    yo = axisPosition(2);
+    w = axisPosition(3);
+    h = axisPosition(4);
 
     if obj.PlotOptions.AxisEqual
-        wh = min(axisData.Position(3:4));
+        wh = min(axisPosition(3:4));
         w = wh;
         h = wh;
     end
@@ -33,29 +34,29 @@ function obj = updateAxisMultipleYAxes(obj,axIndex,yaxIndex)
 
     [xsource, ysource, xoverlay, yoverlay] = findSourceAxis(obj, axIndex, yaxIndex);
 
-    xaxis.anchor = "y" + ysource;
-    yaxis.anchor = "x" + xsource;
+    xaxis.anchor = sprintf("y%d", ysource);
+    yaxis.anchor = sprintf("x%d", xsource);
 
     if xoverlay
-        xaxis.overlaying = "x" + xoverlay;
+        xaxis.overlaying = sprintf("x%d", xoverlay);
     end
     if yoverlay
-        yaxis.overlaying = "y" + yoverlay;
+        yaxis.overlaying = sprintf("y%d", yoverlay);
     end
 
     % update the layout field (do not overwrite source)
     if xsource == axIndex
-        obj.layout.("xaxis" + xsource) = xaxis;
+        obj.layout.(sprintf("xaxis%d", xsource)) = xaxis;
     end
 
     % update the layout field (do not overwrite source)
-    obj.layout.("yaxis" + ysource) = yaxis;
+    obj.layout.(sprintf("yaxis%d", ysource)) = yaxis;
 
     %-REVERT UNITS-%
-    axisData.Units = axisUnits;
+    set(axisData, 'Units', axisUnits);
 
     if isprop(axisData, "FontUnits")
-        axisData.FontUnits = fontUnits;
+        set(axisData, 'FontUnits', fontUnits);
     end
 
     %-do y-axes visible-%
@@ -63,6 +64,6 @@ function obj = updateAxisMultipleYAxes(obj,axIndex,yaxIndex)
     plotIndex = obj.PlotOptions.nPlots;
 
     obj.data{plotIndex}.type = 'scatter';
-    obj.data{plotIndex}.xaxis = "x" + xsource;
-    obj.data{plotIndex}.yaxis = "y" + ysource;
+    obj.data{plotIndex}.xaxis = sprintf("x%d", xsource);
+    obj.data{plotIndex}.yaxis = sprintf("y%d", ysource);
 end

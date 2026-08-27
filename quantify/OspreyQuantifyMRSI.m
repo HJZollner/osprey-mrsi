@@ -229,6 +229,7 @@ for kk = 1:MRSCont.nDatasets
                 out.hdr.dim(2) = 1;
                 out.hdr.pixdim(5) = 1;
                 out.hdr.pixdim(1) = 1; % For the other dataset this was -1 QForm changes 
+                out.hdr.bitpix = 32;
                 if ~isempty(WaterModelMatrix)
                     mkdir(fullfile(saveDestination,['slice_' num2str(reorder(ll))],'concs','rawWaterScaled'))
                 end
@@ -320,6 +321,7 @@ for kk = 1:MRSCont.nDatasets
         out.img = GlobalQC .* brain_mask;
         out.img(isnan(out.img)) =0;
         out.img(isinf(out.img)) =0;
+        out.hdr.bitpix = 8;
         nii_tool('save', out, fullfile(saveDestination,'concs','QC',[  'GlobalQC_FWHM_SNR.nii.gz']));
 
         for mm = 1 : length(metsName)
@@ -339,6 +341,7 @@ for kk = 1:MRSCont.nDatasets
             out.img = squeeze(squeeze(MRSI_model.amplitudes(mm,:,:,:)));        
             out.img(isnan(out.img)) =0;
             out.img(isinf(out.img)) =0;
+            out.hdr.bitpix = 32;
             percentile_val = prctile(out.img(:), MRSCont.opts.MRSI.Quantify.QC.PercentileThreshold);
             nii_tool('save', out, fullfile(saveDestination,'concs','amplitudes',[metsName{mm}  '.nii.gz']));
             MRSCont.quantify.amplitudes.(metsName{mm}) = out.img;
@@ -354,6 +357,7 @@ for kk = 1:MRSCont.nDatasets
             MRSCont.quantify.amplitudes_QCfilt.(metsName{mm}) = out.img;
 
             out.img = MetaboliteQC_FWHM_SNR_CRLB;
+            out.hdr.bitpix = 8;
             nii_tool('save', out, fullfile(saveDestination,'concs','amplitudes_QC',[metsName{mm}  '.nii.gz']));
             MRSCont.quantify.amplitudes_QC.(metsName{mm}) = out.img;
             
@@ -363,6 +367,7 @@ for kk = 1:MRSCont.nDatasets
             out.img = squeeze(squeeze(MRSI_model.amplitudes(mm,:,:,:))./(squeeze(MRSI_model2.amplitudes(end-1,:,:,:))));
             out.img(isnan(out.img)) =0;
             out.img(isinf(out.img)) =0;
+            out.hdr.bitpix = 32;
             percentile_val = prctile(out.img(:), MRSCont.opts.MRSI.Quantify.QC.PercentileThreshold);
             nii_tool('save', out, fullfile(saveDestination,'concs','tCr',[metsName{mm}  '.nii.gz']));
             MRSCont.quantify.tCr.(metsName{mm}) = out.img;
@@ -378,6 +383,7 @@ for kk = 1:MRSCont.nDatasets
 
             out.img = MetaboliteQC_FWHM_SNR_CRLB;
             out.img = out.img  .* brain_mask;
+            out.hdr.bitpix = 8;
             nii_tool('save', out, fullfile(saveDestination,'concs','tCr_QC',[metsName{mm}  '.nii.gz']));
             MRSCont.quantify.tCr_QC.(metsName{mm}) = out.img;
             
@@ -387,6 +393,7 @@ for kk = 1:MRSCont.nDatasets
                 out.img = squeeze(squeeze(MRSI_model.amplitudes(mm,:,:,:))./MRSI_model_water.amplitudes(:,:,:)) * rawWaterScaledFactor.(metsName{mm})(1);
                 out.img(isnan(out.img)) =0;
                 out.img(isinf(out.img)) =0;
+                out.hdr.bitpix = 32;
                 percentile_val = prctile(out.img(:), MRSCont.opts.MRSI.Quantify.QC.PercentileThreshold);
                 nii_tool('save', out, fullfile(saveDestination,'concs','rawWaterScaled',[metsName{mm}  '.nii.gz']));
                 MRSCont.quantify.rawWaterScaled.(metsName{mm}) = out.img;
@@ -402,6 +409,7 @@ for kk = 1:MRSCont.nDatasets
     
                 out.img = MetaboliteQC_FWHM_SNR_CRLB;
                 out.img = out.img  .* brain_mask;
+                out.hdr.bitpix = 8;
                 nii_tool('save', out, fullfile(saveDestination,'concs','rawWaterScaled_QC',[metsName{mm}  '.nii.gz']));
                 MRSCont.quantify.rawWaterScaled_QC.(metsName{mm}) = out.img;
             end
@@ -412,6 +420,7 @@ for kk = 1:MRSCont.nDatasets
                 out.img = squeeze(squeeze(MRSI_model.amplitudes(mm,:,:,:))./MRSI_model_water.amplitudes(:,:,:)) * rawWaterScaledFactor.(metsName{mm})(1) ./ (1-fCSF);
                 out.img(isnan(out.img)) =0;
                 out.img(isinf(out.img)) =0;
+                out.hdr.bitpix = 32;
                 percentile_val = prctile(out.img(:), MRSCont.opts.MRSI.Quantify.QC.PercentileThreshold);
                 nii_tool('save', out, fullfile(saveDestination,'concs','CSFWaterScaled',[metsName{mm}  '.nii.gz']));
                 MRSCont.quantify.CSFrawWaterScaled.(metsName{mm}) = out.img;
@@ -427,6 +436,7 @@ for kk = 1:MRSCont.nDatasets
     
                 out.img = MetaboliteQC_FWHM_SNR_CRLB;
                 out.img = out.img  .* brain_mask;
+                out.hdr.bitpix = 8;
                 nii_tool('save', out, fullfile(saveDestination,'concs','CSFWaterScaled_QC',[metsName{mm}  '.nii.gz']));
                 MRSCont.quantify.CSFrawWaterScaled_QC.(metsName{mm}) = out.img;
                 
@@ -437,7 +447,8 @@ for kk = 1:MRSCont.nDatasets
                 MetaboliteQC_FWHM_SNR_CRLB = MetaboliteQC;
                 out.img = squeeze(squeeze(MRSI_model.amplitudes(mm,:,:,:))./MRSI_model_water.amplitudes(:,:,:)) .* TissCorrWaterScaledFactor.(metsName{mm})(:,:,:);               
                 out.img(isnan(out.img)) =0;
-                out.img(isinf(out.img)) =0;     
+                out.img(isinf(out.img)) =0;   
+                out.hdr.bitpix = 32;
                 % out.img = nonlocalMeansDenoise(out.img);
                 % out.img(isnan(out.img)) =0;
                 % out.img(isinf(out.img)) =0; 
@@ -456,6 +467,7 @@ for kk = 1:MRSCont.nDatasets
     
                 out.img = MetaboliteQC_FWHM_SNR_CRLB;
                 out.img = out.img  .* brain_mask;
+                out.hdr.bitpix = 8;
                 nii_tool('save', out, fullfile(saveDestination,'concs','TissCorrWaterScaled_QC',[metsName{mm}  '.nii.gz']));
                 MRSCont.quantify.TissCorrWaterScaled_QC.(metsName{mm}) = out.img;
             end
@@ -464,6 +476,7 @@ for kk = 1:MRSCont.nDatasets
             out.img = squeeze(MRSI_model.relCRLBs(mm,:,:,:));
             out.img(isnan(out.img)) =0;
             out.img(isinf(out.img)) =0;
+            out.hdr.bitpix = 32;
             nii_tool('save', out, fullfile(saveDestination,'concs','CRLBs',[metsName{mm}  '_CRLBs.nii.gz']));
             MRSCont.quantify.CRLBs.(metsName{mm}) = out.img;
            
@@ -473,6 +486,7 @@ for kk = 1:MRSCont.nDatasets
             out.img = squeeze(squeeze(MRSI_model_water.amplitudes(:,:,:)));
             out.img(isnan(out.img)) =0;
             out.img(isinf(out.img)) =0;
+            out.hdr.bitpix = 32;
             nii_tool('save', out, fullfile(saveDestination,'concs','amplitudes',[  'water.nii.gz']));
         end
          MRSCont.quantify.GlobalQC =  GlobalQC .* brain_mask;
@@ -482,6 +496,7 @@ for kk = 1:MRSCont.nDatasets
         temp_img = squeeze(squeeze(MRSI_model_water.amplitudes(:,:,:)));
         temp_img(isnan(temp_img)) =0;
         temp_img(isinf(temp_img)) =0;
+        out.hdr.bitpix = 32;
         MRSCont.quantify.water = temp_img;
     end
 
