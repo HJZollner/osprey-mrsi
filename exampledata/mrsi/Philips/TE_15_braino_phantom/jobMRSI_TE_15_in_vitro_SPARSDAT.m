@@ -116,6 +116,11 @@ opts.fit.fitMM              = 1;                % OPTIONS:    - 0 (no)
 opts.MRSI.interactive = 0;
 
 % You can add voxel shifts and flips to the nifti output if needed
+% The nifti conversion has been tested on the example
+% data presented in the manuscript referenced above. MRS data from other
+% vendors, releases, or sequences may need adaption for correct
+% localization defintion. Please proceed with care and valdiate the
+% localization against online visualization.
 opts.MRSI.nii_shifts = [0.5 0.5 0.5];
 opts.MRSI.nii_flip.cc = 1;
 

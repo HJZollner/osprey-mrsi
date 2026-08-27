@@ -1,7 +1,9 @@
 function [MRSCont] = OspreyMRSI(jobFile,overwrite,stopAfterProcess)
 %% MRSI analysis wrapper in Osprey-MRSI v. 1.0.0
-% This is script accompanies the beta version of the MRSI analysis pipeline
-% in Osprey which was presented at ISMRM 2025. 
+% This script automatically runs a end-to-end MRSI analysis workflow
+% which is presented in the manuscript 'Fully automated open-source
+% analysis and interactive visualization of magnetic resonance spectroscopic imaging (MRSI) data in Osprey-MRSI'
+% by Zollner et al. 2026.
 % 
 % Please make sure to remove any older Osprey versions from your Matlab
 % path. Add the full OspreyMRSIbeta folder to the path. For data
@@ -16,6 +18,28 @@ function [MRSCont] = OspreyMRSI(jobFile,overwrite,stopAfterProcess)
 % needs to be converted to nifti-mrs format using spec2nii.
 %
 % Below you can find example function calls for the MRSI analysis
+%
+%   USAGE:
+%       [MRSCont] = OspreyMRSI(jobFile,overwrite,stopAfterProcess);
+%
+%   INPUTS:
+%       jobFile     = File containing a correct Osprey job definition.
+%                     Accepted file formats are .m and .csv.
+%       overwrite   = flag to overwrite outputs '11' overwrites the
+%                     derivatives. '00' envokes a interactive dialog
+%       stopAfterProcess = terminates the Osprey-MRSI workflow after the
+%                       processing step
+%
+%   OUTPUTS:
+%       MRSCont     = Osprey MRS data container.
+%
+%   AUTHOR:
+%       Dr. Helge Zollner (Johns Hopkins University, 2025-03-06)
+%       hzoelln2@jhmi.edu
+%
+%
+%   HISTORY:
+%       2026-03-06: First version of the code.
 %% Parse input
 if nargin < 3
     stopAfterProcess = 0;
@@ -30,7 +54,11 @@ end
 %
 % Here data information (path to different MRSI files) are parsed into the
 % MRSCont master structure. You can add voxel shifts and flips to the nifti
-% output if needed
+% output if needed. The nifti conversion has been tested on the example
+% data presented in the manuscript referenced above. MRS data from other
+% vendors, releases, or sequences may need adaption for correct
+% localization defintion. Please proceed with care and valdiate the
+% localization against online visualization.
 %
 % MRSCont.opts.MRSI.nii_shifts = [0.5 0.5 0.5];
 % MRSCont.opts.MRSI.nii_flip.cc = 1;

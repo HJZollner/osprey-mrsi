@@ -1,11 +1,10 @@
 % This script automatically runs the analysis of the Osprey MRSI example
 % data which is presented in the manuscript 'Fully automated open-source
-% analysis of magnetic resonance spectroscopic imaging (MRSI) data in Osprey'
+% analysis and interactive visualization of magnetic resonance spectroscopic imaging (MRSI) data in Osprey-MRSI'
 % by Zollner et al. 2026.
 % 
 %   PREREQUISITS:
-%   Osprey MRSI from the MRSI GitHub branch in Matlab path
-%   (https://github.com/schorschinho/osprey/tree/MRSI)
+%   Osprey MRSI Matlab path (https://github.com/HJZollner/osprey-mrsi)
 %   All toolboxes required to run Osprey
 %   (https://schorschinho.github.io/osprey/getting-started.html#system-requirements)
 %   
@@ -14,16 +13,30 @@
 %   files.
 %
 %
+%   USAGE:
+%       [MRSCont] = OspreyMRSI(jobFile,overwrite,stopAfterProcess);
+%
+%   INPUTS:
+%       jobFile     = File containing a correct Osprey job definition.
+%                     Accepted file formats are .m and .csv.
+%       overwrite   = flag to overwrite outputs '11' overwrites the
+%                     derivatives. '00' envokes a interactive dialog
+%       stopAfterProcess = terminates the Osprey-MRSI workflow after the
+%                       processing step
+%
+%   OUTPUTS:
+%       MRSCont     = Osprey MRS data container.
+%
 %   AUTHOR:
 %       Dr. Helge Zollner (Johns Hopkins University, 2025-03-06)
 %       hzoelln2@jhmi.edu
 %
 %
 %   HISTORY:
-%       2025-03-06: First version of the code.
+%       2026-03-06: First version of the code.
 
 assert(exist('OspreyMRSI')>0,'Please ensure that the osprey-mrsi folder (and subfolders) have been added to the MATLAB path')
-assert(strlen(which((fullfile('exampledata','mrsi','GE','TE_30_phantom_acr','jobMRSI_TE_30_in_vitro_P_NII_ax.m'))))>0, 'Please ensure that the example data has been extracted to the "exampledata/mrsi" subfolder')
+assert(strlength(which((fullfile('exampledata','mrsi','GE','TE_30_phantom_acr','jobMRSI_TE_30_in_vitro_P_NII_ax.m'))))>0, 'Please ensure that the example data has been extracted to the "exampledata/mrsi" subfolder')
 
 %% In Vitro datasets
 MRSCont = OspreyMRSI(which(fullfile('exampledata','mrsi','Philips','TE_15_braino_phantom','jobMRSI_TE_15_in_vitro_SPARSDAT.m')),'11',1);
