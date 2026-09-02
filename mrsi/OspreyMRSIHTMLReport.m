@@ -789,7 +789,7 @@ function [varStruct] = createInteractiveFigure(MRSCont,Module,varStruct,limits,o
         case 'OspreyProcessGlobalQCMap'
             progressMsg('OspreyProcess: plotting Global QC filtering map...');
             varStruct.names_quickMaps_proc{end+1} = ['Global QC filtering'];
-            osp_plotMetabolitemaps(MRSCont,'GlobalQC','tNAA_Acetyl_only',1,MRSCont.raw{1, 1}.nZvoxels,1,1,0);
+            osp_plotMetabolitemaps(MRSCont,'GlobalQC','tNAA_Acetyl',1,MRSCont.raw{1, 1}.nZvoxels,1,1,0);
             fig = gcf;
             set(fig, 'Visible', 'off');
             set(fig,'Renderer','painters');

@@ -12,7 +12,7 @@ function out = osp_plotMetabolitemapsOverlay(MRSCont, quantification, metabolite
 %   INPUTS:
 %       MRSCont         = Osprey data container.
 %       quantification  = Which quantification to plot ('amplitudes', 'water', 'GlobalQC', etc.)
-%       metabolite      = Target metabolite ('tNAA_Acetyl_only', 'tCr', etc.)
+%       metabolite      = Target metabolite ('tNAA_Acetyl', 'tCr', etc.)
 %       idx_start       = index MRSI slice to start (1 at bottom)
 %       idx_end         = index MRSI slice to end
 %       viridis_map     = use viridis colormap (1) or hot colormap (0)
@@ -55,7 +55,7 @@ if nargin < 12
                                 if nargin < 4
                                     idx_start = 1;
                                     if nargin < 3
-                                        metabolite = 'tNAA_Acetyl_only';
+                                        metabolite = 'tNAA_Acetyl';
                                         if nargin < 2
                                             quantification = 'amplitudes';
                                             if nargin < 1

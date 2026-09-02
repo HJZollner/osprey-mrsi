@@ -18,6 +18,7 @@
 assert(exist('OspreyMRSI')>0,'Please ensure that the osprey-mrsi folder (and subfolders) have been added to the MATLAB path')
 assert(strlength(which((fullfile('exampledata','mrsi','Philips','TE_15_braino_phantom','derivatives','jobMRSI_TE_30_in_vitro_P_NII_ax.mat'))))>0, 'Please run the "osprey-mrsi/exampledata/RunAllDatasets.m" script before proceeding with the plots.')
 %% In Vitro Scan Philips
+assert(strlength(which((fullfile('exampledata','mrsi','Philips','TE_15_braino_phantom','derivatives','jobMRSI_TE_30_in_vitro_P_NII_ax.mat'))))>0, 'Philips in vitro results are missing. Please run the "osprey-mrsi/exampledata/RunAllDatasets.m" script before proceeding with the plots.')
 load(which(fullfile('exampledata','mrsi','Philips','TE_15_braino_phantom','derivatives','jobMRSI_TE_15_in_vitro_SPARSDAT.mat')));
 
 out = osp_plotQuickmapsOverlay(MRSCont,'w','H2O',1,5,1,0,'T1w_rMRSI',0.8,0);
@@ -69,14 +70,16 @@ saveas(gcf,'SI_7_Voxel_all.fig','fig');
 close(gcf);
 
 %% Phantom scan GE ACR
-load(which(fullfile('exampledata','mrsi','GE','TE_30_phantom_acr','derivatives','jobMRSI_TE_30_in_vitro_P_NII_sag.mat')));
+assert(strlength(which((fullfile('exampledata','mrsi','GE','TE_30_phantom_acr','derivatives_sag','jobMRSI_TE_30_in_vitro_P_NII_sag.mat'))))>0, 'GE saggital in vitro results are missing. Please run the "osprey-mrsi/exampledata/RunAllDatasets.m" script before proceeding with the plots.')
+load(which(fullfile('exampledata','mrsi','GE','TE_30_phantom_acr','derivatives_sag','jobMRSI_TE_30_in_vitro_P_NII_sag.mat')));
 out = osp_plotCoregMRSI(MRSCont, 'T1w_rMRSI', 1, 0, 0, 0,1,1);
 set(gcf,'Renderer', 'painters');
 saveas(gcf,'SI_7_GE_ACR_mask_sag.pdf','pdf');
 saveas(gcf,'SI_7_GE_ACR_mask_sag.fig','fig');
 close(gcf);
 
-load(which(fullfile('exampledata','mrsi','GE','TE_30_phantom_acr','derivatives','jobMRSI_TE_30_in_vitro_P_NII_ax.mat')));
+assert(strlength(which((fullfile('exampledata','mrsi','GE','TE_30_phantom_acr','derivatives_ax','jobMRSI_TE_30_in_vitro_P_NII_ax.mat'))))>0, 'GE axial in vitro results are missing. Please run the "osprey-mrsi/exampledata/RunAllDatasets.m" script before proceeding with the plots.')
+load(which(fullfile('exampledata','mrsi','GE','TE_30_phantom_acr','derivatives_ax','jobMRSI_TE_30_in_vitro_P_NII_ax.mat')));
 out = osp_plotCoregMRSI(MRSCont, 'T1w_rMRSI', 1, 0, 0, 0,1,1);
 set(gcf,'Renderer', 'painters');
 saveas(gcf,'SI_7_GE_ACR_mask_ax.pdf','pdf');
@@ -84,7 +87,7 @@ saveas(gcf,'SI_7_GE_ACR_mask_ax.fig','fig');
 close(gcf);
 
 %% In Vitro scan Siemens ACR
-
+assert(strlength(which((fullfile('exampledata','mrsi','Siemens','TE_40_phantom_acr','derivatives','jobMRSI_TE_40_in_vitro_RDA_NII.mat'))))>0, 'Siemens in vitro results are missing. Please run the "osprey-mrsi/exampledata/RunAllDatasets.m" script before proceeding with the plots.')
 load(which(fullfile('exampledata','mrsi','Siemens','TE_40_phantom_acr','derivatives','jobMRSI_TE_40_in_vitro_RDA_NII.mat')))
 
 out = osp_plotCoregMRSI(MRSCont, 'T1w_rMRSI', 1, 0, 0, 0,2,2);
@@ -94,6 +97,7 @@ saveas(gcf,'SI_7_Siemens_ACR_mask_ax.fig','fig');
 close(gcf);
 
 %% In vivo medium-TE MRSI dataset figures
+assert(strlength(which((fullfile('exampledata','mrsi','Philips','TE_70','derivatives','jobMRSI_TE_70_SPARSDAT.mat'))))>0, 'Philips in vitro medium-TE results are missing. Please run the "osprey-mrsi/exampledata/RunAllDatasets.m" script before proceeding with the plots.')
 load(which(fullfile('exampledata','mrsi','Philips','TE_70','derivatives','jobMRSI_TE_70_SPARSDAT.mat')));
 
 % Segmentation & Coregistration
@@ -242,7 +246,7 @@ saveas(gcf,'Figure_2_tCho_GlobalConc.fig','fig');
 close(gcf);
 
 %% In vivo short-TE MRSI dataset figures.
-
+assert(strlength(which((fullfile('exampledata','mrsi','Philips','TE_15','derivatives','jobMRSI_TE_15_SPARSDAT.mat'))))>0, 'Philips in vivo short-TE results are missing. Please run the "osprey-mrsi/exampledata/RunAllDatasets.m" script before proceeding with the plots.')
 load(which(fullfile('exampledata','mrsi','Philips','TE_15','derivatives','jobMRSI_TE_15_SPARSDAT.mat')));
 
 % Voxels Coreg
@@ -382,7 +386,7 @@ close(gcf);
 
 %% In vivo GE MRSI datasets Supplementary Material
 % short-TE MRSI dataset 30 ms
-
+assert(strlength(which((fullfile('exampledata','mrsi','GE','TE_30','derivatives','jobMRSI_TE_30_P_NII.mat'))))>0, 'GE in vivo short-TE results are missing. Please run the "osprey-mrsi/exampledata/RunAllDatasets.m" script before proceeding with the plots.')
 load(which(fullfile('exampledata','mrsi','GE','TE_30','derivatives','jobMRSI_TE_30_P_NII.mat')));
 out = osp_plotSpecAndLocMRSI(MRSCont,[8,7,1;9,7,1;8,8,1;], 'T1w_rMRSI','OspreyFit','metab','Fit1DStack',0,2,2,0,1);
 set(gcf, 'units','normalized','outerposition',[0 0 1 0.66]);
@@ -392,6 +396,7 @@ saveas(gcf,'SI_8_Fit_TE30.fig','fig');
 close(gcf);
 
 % medium-TE MRSI dataset 70 ms
+assert(strlength(which((fullfile('exampledata','mrsi','GE','TE_70','derivatives','jobMRSI_TE_70_P_NII.mat'))))>0, 'GE in vivo medium-TE results are missing. Please run the "osprey-mrsi/exampledata/RunAllDatasets.m" script before proceeding with the plots.')
 load(which(fullfile('exampledata','mrsi','GE','TE_70','derivatives','jobMRSI_TE_70_P_NII.mat')));
 out = osp_plotSpecAndLocMRSI(MRSCont,[8,7,1;9,7,1;8,8,1;], 'T1w_rMRSI','OspreyFit','metab','Fit1DStack',0,2,2,0,1);
 set(gcf, 'units','normalized','outerposition',[0 0 1 0.66]);
@@ -403,6 +408,7 @@ close(gcf);
 %% In vivo Siemens MRSI datasets Supplementary Material
 
 % short-TE MRSI dataset 30 ms
+assert(strlength(which((fullfile('exampledata','mrsi','Siemens','TE_35','derivatives','jobMRSI_TE_35_RDA_NII.mat'))))>0, 'Siemens in vivo short-TE results are missing. Please run the "osprey-mrsi/exampledata/RunAllDatasets.m" script before proceeding with the plots.')
 load(which(fullfile('exampledata','mrsi','Siemens','TE_35','derivatives','jobMRSI_TE_35_RDA_NII.mat')));
 out = osp_plotSpecAndLocMRSI(MRSCont,[9,8,1;10,8,1;11,8,1;], 'T1w_rMRSI','OspreyFit','metab','Fit1DStack',0,2,2,0,1);
 set(gcf, 'units','normalized','outerposition',[0 0 1 0.66]);
@@ -425,6 +431,7 @@ close(gcf);
 
 
 % long-TE MRSI dataset TE 280 ms
+assert(strlength(which((fullfile('exampledata','mrsi','Siemens','TE_280','derivatives','jobMRSI_TE_280_RDA_NII.mat'))))>0, 'Siemens in vivo long-TE results are missing. Please run the "osprey-mrsi/exampledata/RunAllDatasets.m" script before proceeding with the plots.')
 load(which(fullfile('exampledata','mrsi','Siemens','TE_280','derivatives','jobMRSI_TE_280_RDA_NII.mat')));
 
 out = osp_plotSpecAndLocMRSI(MRSCont,[9,8,1;10,8,1;11,8,1;], 'T1w_rMRSI','OspreyFit','metab','Fit1DStack',0,2,2,0,1);
