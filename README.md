@@ -98,6 +98,7 @@ development of Osprey and shared processing code:
 
 - Georg Oeltzschner (Johns Hopkins University, Baltimore, MD)
 - Alexander R. Craven (Haukeland University, Bergen)
+- Dillip K. Senapati (Johns Hopkins University, Baltimore, MD) 
 - Jamie Near (McGill University, Montreal)
 - Ralph Noeske (GE Healthcare, Berlin)
 - Peter Barker (Johns Hopkins University, Baltimore, MD)
