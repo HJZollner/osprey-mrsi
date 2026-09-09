@@ -466,15 +466,11 @@ for kk = 1:MRSCont.nDatasets
             mrProt.VOI3D = geometry.size.cc;
             mrProt.FOVHeight = geometry.size.ap;
             mrProt.FOVWidth = geometry.size.lr;
-            mrProt.FOV3D = geometry.phase_encoding_fov;
-            mrProt.DwellTime=1/sw;
-            mrProt.NMRFreq = Larmor;
-            mrProt.TE = te * E-3; %TE ms
-            mrProt.PtsBeforeEcho = 0;
+            mrProt.FOV3D = geometry.size.cc;
             mrsiReconParams.mrProt = mrProt;
             mrsiReconParams.Water_ctkkk = Water_ctkkk;
             mrsiReconParams.Water_kmask = Water_kmask;
-            mrsiReconParams.Water_mrProt = mrProt;
+            mrsiReconParams.Water_mrProt = Water_mrProt;
             clear Water_ctkkk k_sort Water_kmask kmask
         end
 

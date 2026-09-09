@@ -1,5 +1,6 @@
-function [k_fft2_wat_ref, k_fft2_wat_ref_no_k_zfill, k_sort_b4_2dfft,coilcombos,coilcombos_b4_2dfft] = process_wat_ref(this_file, k_zfill, seq_type,coilcombo)
+function [k_fft2_wat_ref, k_fft2_wat_ref_no_k_zfill, k_sort_b4_2dfft,coilcombos,coilcombos_b4_2dfft,mrsiData_ctkkk,Water_kmask] = process_wat_ref(this_file, k_zfill, seq_type,coilcombo,doCSReon)
 
+    Water_kmask = [];
     fprintf('\nReading water scan parameters.')
     [data] = loadRawKspace(this_file);
 
@@ -19,19 +20,27 @@ function [k_fft2_wat_ref, k_fft2_wat_ref_no_k_zfill, k_sort_b4_2dfft,coilcombos,
     % Determine number of data points per scan
     n_points = data.kspace_properties.F_resolution(1);
      % Determine number of data points per scan
-    kz_tot = data.kspace_properties.number_of_locations(1);
+     if ~strcmp(seq_type,'3D FID')
+        kz_tot = data.kspace_properties.number_of_locations(1);
+     else
+        kz_tot = abs(data.kspace_properties.kz_range(1)) + abs(data.kspace_properties.kz_range(2)) +1 ;
+     end
     % Determine number of data points per scan
     kx_tot = abs(data.kspace_properties.kx_range(1)) + abs(data.kspace_properties.kx_range(2)) +1 ;
      % Determine number of data points per scan
     ky_tot = abs(data.kspace_properties.ky_range(1)) + abs(data.kspace_properties.ky_range(2)) +1 ;
     
-    if kz_tot > 1
+    if kz_tot > 1 && ~strcmp(seq_type,'3D FID')
         seq_type = 'MEGA multislice';
     end
     
     data.kx = data.kx + abs(min(data.kx)) + 1;
     data.ky = data.ky + abs(min(data.ky)) + 1;
-    data.loca = data.loca + abs(min(data.kz)) + 1;
+    if ~strcmp(seq_type,'3D FID')
+        data.loca = data.loca + abs(min(data.kz)) + 1;
+    else
+        data.kz = data.kz + abs(min(data.kz)) + 1;
+    end
     data.aver = data.aver + 1;
     data.chan = data.chan + 1;
     
@@ -47,13 +56,16 @@ function [k_fft2_wat_ref, k_fft2_wat_ref_no_k_zfill, k_sort_b4_2dfft,coilcombos,
     isdata = strcmp(data.typ,'STD') & (data.mix == 0);
     data_matrix = cell2mat(data.complexdata(isdata));
     
-if kz_tot > 1
+if kz_tot > 1 && ~strcmp(seq_type,'3D FID')
     seq_type = 'MEGA multislice';
 end
   
 
-if strcmp(seq_type, 'MEGA multislice') || strcmp(seq_type, 'SE multislice')
+if strcmp(seq_type, 'MEGA multislice') || strcmp(seq_type, 'SE multislice') || strcmp(seq_type,'3D FID')
     k_sort = zeros(kz_tot, kx_tot, ky_tot, n_coils, n_points);
+    if strcmp(seq_type,'3D FID')
+        Water_kmask = zeros(kx_tot,ky_tot,kz_tot);
+    end
 else
     k_sort = zeros(kx_tot, ky_tot, n_coils, n_points);
 end
@@ -63,10 +75,14 @@ disp('Reorganizing water reference k-space locations.')
 
         
 for dl = 1:size(data_matrix,1)    
-    if ~strcmp(seq_type, 'MEGA multislice') && ~strcmp(seq_type, 'SE multislice')
+    if ~strcmp(seq_type, 'MEGA multislice') && ~strcmp(seq_type, 'SE multislice') && ~strcmp(seq_type,'3D FID')
         k_sort(data.kx(dl+noise_line), data.ky(dl+noise_line), data.chan(dl+noise_line), :) = data_matrix(dl,:);
-    else
-        k_sort(data.loca(dl+noise_line),data.kx(dl+noise_line), data.ky(dl+noise_line), data.chan(dl+noise_line), :) = data_matrix(dl,:);
+    else if ~strcmp(seq_type,'3D FID')
+            k_sort(data.loca(dl+noise_line),data.kx(dl+noise_line), data.ky(dl+noise_line), data.chan(dl+noise_line), :) = data_matrix(dl,:);
+        else
+            k_sort(data.kz(dl+noise_line),data.kx(dl+noise_line), data.ky(dl+noise_line), data.chan(dl+noise_line), :) = data_matrix(dl,:);
+            Water_kmask(data.kx(dl+noise_line),data.ky(dl+noise_line),data.kz(dl+noise_line)) = 1;
+        end
     end
     
 end
@@ -108,104 +124,117 @@ else
     hanning_x = permute(hanning_x, [2 1 3 4 5]);
 end
 
-k_sort = k_sort.*hanning_x;
-k_sort = k_sort.*hanning_y;
-k_sort_b4_2dfft = k_sort;
-
-% ------------------------------------------------------------------------------------------
-% Let's calcualte k-space ph with the angle function
-coilcombos_b4_2dfft.ph = angle(k_sort(:,:,:,:,1));
-
-% ------------------------------------------------------------------------------------------
-% For each point in time and coil take the 2D fft
-if ~strcmp(seq_type, 'MEGA multislice') && ~strcmp(seq_type, 'SE multislice')
-    sz_k_sort = size(k_sort);
-    k_fft2_wat_ref = zeros([kx_tot,ky_tot,sz_k_sort(3:end)]);
-    k_fft2_wat = zeros([kx_tot,ky_tot, sz_k_sort(3)]);
-    k_fft2_wat_no_k_zfill = zeros([kx_tot,ky_tot, sz_k_sort(3)]);
-    k_fft2_wat_ref_no_k_zfill = zeros([kx_tot,ky_tot, sz_k_sort(3)]);
-
-    disp('Taking Fourier transforms of water reference data.')
-    for c_idx = 1:size(k_sort,3) % Each coil
-        wat_on_peak = squeeze(k_sort(:,:,c_idx,1));
-        k_fft2_wat(:,:,c_idx) = fft2(wat_on_peak, kx_tot,ky_tot);
-        k_fft2_wat_no_k_zfill(:,:,c_idx) = fft2(wat_on_peak);
-
-        for t_idx = 1:size(k_sort, 4) % Each point in time
-            k_fft2_wat_ref(:,:,c_idx, t_idx) = fft2(squeeze(k_sort(:,:,c_idx,t_idx)),kx_tot,ky_tot);
-            k_fft2_wat_ref_no_k_zfill(:,:,c_idx, t_idx) = fft2(squeeze(k_sort(:,:,c_idx,t_idx)));
-        end
-    end
+if doCSReon
+    mrsiData_ctkkk = permute(k_sort, [4 5 1 2 3]);
+    k_fft2_wat_ref = [];
+    k_fft2_wat_ref_no_k_zfill = [];
+    k_sort_b4_2dfft = [];
+    coilcombos = [];
+    coilcombos_b4_2dfft = [];
 else
-    sz_k_sort = size(k_sort);
-    k_fft2_wat_ref = zeros([3,kx_tot,ky_tot,sz_k_sort(4:end)]);
-    k_fft2_wat = zeros([3,kx_tot,ky_tot, sz_k_sort(4)]);
-    k_fft2_wat_no_k_zfill = zeros([3,kx_tot,ky_tot, sz_k_sort(4)]);
-    k_fft2_wat_ref_no_k_zfill = zeros([3,kx_tot,ky_tot, sz_k_sort(4)]);
+    mrsiData_ctkkk = [];
+    k_sort = k_sort.*hanning_x;
+    k_sort = k_sort.*hanning_y;
+    k_sort_b4_2dfft = k_sort;
 
-    disp('Taking Fourier transforms of water reference data.')
-    for c_idx = 1:size(k_sort,4) % Each coil
-        wat_on_peak = squeeze(k_sort(:,:,:,c_idx,1));
 
-        for s_idx = 1:3
-            k_fft2_wat(s_idx,:,:,c_idx) = fft2(squeeze(wat_on_peak(s_idx,:,:)), kx_tot,ky_tot);
-            k_fft2_wat_no_k_zfill(s_idx,:,:,c_idx) = fft2(squeeze(wat_on_peak(s_idx,:,:)));
+
+
+    % ------------------------------------------------------------------------------------------
+    % Let's calcualte k-space ph with the angle function
+    coilcombos_b4_2dfft.ph = angle(k_sort(:,:,:,:,1));
+    
+    % ------------------------------------------------------------------------------------------
+    % For each point in time and coil take the 2D fft
+    if ~strcmp(seq_type, 'MEGA multislice') && ~strcmp(seq_type, 'SE multislice')
+        sz_k_sort = size(k_sort);
+        k_fft2_wat_ref = zeros([kx_tot,ky_tot,sz_k_sort(3:end)]);
+        k_fft2_wat = zeros([kx_tot,ky_tot, sz_k_sort(3)]);
+        k_fft2_wat_no_k_zfill = zeros([kx_tot,ky_tot, sz_k_sort(3)]);
+        k_fft2_wat_ref_no_k_zfill = zeros([kx_tot,ky_tot, sz_k_sort(3)]);
+    
+        disp('Taking Fourier transforms of water reference data.')
+        for c_idx = 1:size(k_sort,3) % Each coil
+            wat_on_peak = squeeze(k_sort(:,:,c_idx,1));
+            k_fft2_wat(:,:,c_idx) = fft2(wat_on_peak, kx_tot,ky_tot);
+            k_fft2_wat_no_k_zfill(:,:,c_idx) = fft2(wat_on_peak);
+    
+            for t_idx = 1:size(k_sort, 4) % Each point in time
+                k_fft2_wat_ref(:,:,c_idx, t_idx) = fft2(squeeze(k_sort(:,:,c_idx,t_idx)),kx_tot,ky_tot);
+                k_fft2_wat_ref_no_k_zfill(:,:,c_idx, t_idx) = fft2(squeeze(k_sort(:,:,c_idx,t_idx)));
+            end
         end
-
-        for t_idx = 1:size(k_sort, 5) % Each point in time
+    else
+        sz_k_sort = size(k_sort);
+        k_fft2_wat_ref = zeros([3,kx_tot,ky_tot,sz_k_sort(4:end)]);
+        k_fft2_wat = zeros([3,kx_tot,ky_tot, sz_k_sort(4)]);
+        k_fft2_wat_no_k_zfill = zeros([3,kx_tot,ky_tot, sz_k_sort(4)]);
+        k_fft2_wat_ref_no_k_zfill = zeros([3,kx_tot,ky_tot, sz_k_sort(4)]);
+    
+        disp('Taking Fourier transforms of water reference data.')
+        for c_idx = 1:size(k_sort,4) % Each coil
+            wat_on_peak = squeeze(k_sort(:,:,:,c_idx,1));
+    
             for s_idx = 1:3
-                k_fft2_wat_ref(s_idx,:,:,c_idx, t_idx) = fft2(squeeze(k_sort(s_idx,:,:,c_idx,t_idx)),kx_tot,ky_tot);
-                k_fft2_wat_ref_no_k_zfill(s_idx,:,:,c_idx, t_idx) = fft2(squeeze(k_sort(s_idx,:,:,c_idx,t_idx)));
+                k_fft2_wat(s_idx,:,:,c_idx) = fft2(squeeze(wat_on_peak(s_idx,:,:)), kx_tot,ky_tot);
+                k_fft2_wat_no_k_zfill(s_idx,:,:,c_idx) = fft2(squeeze(wat_on_peak(s_idx,:,:)));
+            end
+    
+            for t_idx = 1:size(k_sort, 5) % Each point in time
+                for s_idx = 1:3
+                    k_fft2_wat_ref(s_idx,:,:,c_idx, t_idx) = fft2(squeeze(k_sort(s_idx,:,:,c_idx,t_idx)),kx_tot,ky_tot);
+                    k_fft2_wat_ref_no_k_zfill(s_idx,:,:,c_idx, t_idx) = fft2(squeeze(k_sort(s_idx,:,:,c_idx,t_idx)));
+                end
             end
         end
     end
-end
-
-% ------------------------------------------------------------------------------------------
-% Let's calcualte ph with the angle function after 2dfft
-coilcombos.ph = angle(k_fft2_wat_ref_no_k_zfill(:,:,:,:,1));
-
-if ~strcmp(seq_type, 'MEGA multislice') && ~strcmp(seq_type, 'SE multislice')
-    for kx = 1 : size(k_fft2_wat_ref_no_k_zfill,2)
-        for ky = 1 : size(k_fft2_wat_ref_no_k_zfill,1)
-          for c = 1 : size(k_fft2_wat_ref_no_k_zfill,3)  
-              if strcmp(coilcombo,'h')
-                S=max(abs(k_fft2_wat_ref_no_k_zfill(ky,kx,c,1)));
-                N=std(k_fft2_wat_ref_no_k_zfill(ky,kx,c,end-25:end));
-                coilcombos.sig(ky,kx,c)=(S/(N.^2));
-              else
-                coilcombos.sig(ky,kx,c)=(abs(k_fft2_wat_ref_no_k_zfill(ky,kx,c,1)));
-              end
-          end
-        end
-    end
-    for kx = 1 : size(k_fft2_wat_ref_no_k_zfill,2)
-        for ky = 1 : size(k_fft2_wat_ref_no_k_zfill,1)
-            coilcombos.sig(ky,kx,:)=coilcombos.sig(ky,kx,:)/max(coilcombos.sig(ky,kx,:));
-        end
-    end
-else
-    for kz = 1 : size(k_fft2_wat_ref_no_k_zfill,1)
-        for kx = 1 : size(k_fft2_wat_ref_no_k_zfill,3)
-            for ky = 1 : size(k_fft2_wat_ref_no_k_zfill,2)
-              for c = 1 : size(k_fft2_wat_ref_no_k_zfill,4)  
+    
+    % ------------------------------------------------------------------------------------------
+    % Let's calcualte ph with the angle function after 2dfft
+    coilcombos.ph = angle(k_fft2_wat_ref_no_k_zfill(:,:,:,:,1));
+    
+    if ~strcmp(seq_type, 'MEGA multislice') && ~strcmp(seq_type, 'SE multislice')
+        for kx = 1 : size(k_fft2_wat_ref_no_k_zfill,2)
+            for ky = 1 : size(k_fft2_wat_ref_no_k_zfill,1)
+              for c = 1 : size(k_fft2_wat_ref_no_k_zfill,3)  
                   if strcmp(coilcombo,'h')
-                    S=max(abs(k_fft2_wat_ref_no_k_zfill(kz,ky,kx,c,1)));
-                    N=std(k_fft2_wat_ref_no_k_zfill(kz,ky,kx,c,end-25:end));
-                    coilcombos.sig(kz,ky,kx,c)=(S/(N.^2));
+                    S=max(abs(k_fft2_wat_ref_no_k_zfill(ky,kx,c,1)));
+                    N=std(k_fft2_wat_ref_no_k_zfill(ky,kx,c,end-25:end));
+                    coilcombos.sig(ky,kx,c)=(S/(N.^2));
                   else
-                    coilcombos.sig(kz,ky,kx,c)=(abs(k_fft2_wat_ref_no_k_zfill(kz,ky,kx,c,1)));
+                    coilcombos.sig(ky,kx,c)=(abs(k_fft2_wat_ref_no_k_zfill(ky,kx,c,1)));
                   end
               end
             end
         end
-    end
-    for kz = 1 : size(k_fft2_wat_ref_no_k_zfill,1)
-        for kx = 1 : size(k_fft2_wat_ref_no_k_zfill,3)
-            for ky = 1 : size(k_fft2_wat_ref_no_k_zfill,2)
-                coilcombos.sig(kz,ky,kx,:)=coilcombos.sig(kz,ky,kx,:)/max(coilcombos.sig(kz,ky,kx,:));
+        for kx = 1 : size(k_fft2_wat_ref_no_k_zfill,2)
+            for ky = 1 : size(k_fft2_wat_ref_no_k_zfill,1)
+                coilcombos.sig(ky,kx,:)=coilcombos.sig(ky,kx,:)/max(coilcombos.sig(ky,kx,:));
+            end
+        end
+    else
+        for kz = 1 : size(k_fft2_wat_ref_no_k_zfill,1)
+            for kx = 1 : size(k_fft2_wat_ref_no_k_zfill,3)
+                for ky = 1 : size(k_fft2_wat_ref_no_k_zfill,2)
+                  for c = 1 : size(k_fft2_wat_ref_no_k_zfill,4)  
+                      if strcmp(coilcombo,'h')
+                        S=max(abs(k_fft2_wat_ref_no_k_zfill(kz,ky,kx,c,1)));
+                        N=std(k_fft2_wat_ref_no_k_zfill(kz,ky,kx,c,end-25:end));
+                        coilcombos.sig(kz,ky,kx,c)=(S/(N.^2));
+                      else
+                        coilcombos.sig(kz,ky,kx,c)=(abs(k_fft2_wat_ref_no_k_zfill(kz,ky,kx,c,1)));
+                      end
+                  end
+                end
+            end
+        end
+        for kz = 1 : size(k_fft2_wat_ref_no_k_zfill,1)
+            for kx = 1 : size(k_fft2_wat_ref_no_k_zfill,3)
+                for ky = 1 : size(k_fft2_wat_ref_no_k_zfill,2)
+                    coilcombos.sig(kz,ky,kx,:)=coilcombos.sig(kz,ky,kx,:)/max(coilcombos.sig(kz,ky,kx,:));
+                end
             end
         end
     end
-end
+    end
 end
