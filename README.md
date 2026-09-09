@@ -85,9 +85,12 @@ We also welcome your direct contributions to Osprey here in the GitHub repositor
 - [Helge J. Zöllner](mailto:hzoelln2@jhu.edu)
 
 
-Should you publish material that made use of Osprey-MRSI, please cite the following publication:
+Should you publish material that made use of Osprey-MRSI, please cite the following publications:
 
-[G Oeltzschner, HJ Zöllner, SCN Hui, M Mikkelsen, MG Saleh, S Tapper, RAE Edden. Osprey: Open-Source Processing, Reconstruction  & Estimation of Magnetic Resonance Spectroscopy Data. J Neurosci Meth 343:108827 (2020).](https://doi.org/10.1016/j.jneumeth.2020.108827)
+[HJ Zöllner, AR Craven, V Karlaftis, WT Clarke, DK Senapati, DDM Lin, G Oeltzschner, PB Barker. Fully automated open-source analysis and interactive visualization of magnetic resonance spectroscopic imaging (MRSI) data in Osprey-MRSI. bioRxiv 2026.09.02.748934 (2026)](https://doi.org/10.64898/2026.09.02.748934)
+
+[HJ Zöllner, C Davies-Jenkins, D Simicic, A Tal, J Sulam, G Oeltzschner. Simultaneous multi-transient linear-combination modeling of MRS data improves uncertainty estimation. Magnetic Resonance in Medicine 92(3):916–25 (2024).](https://doi.org/10.1002/mrm.30110)
+
 
 ## Acknowledgements
 
